@@ -1,0 +1,41 @@
+service:
+  name: tradle-mycloud-services
+
+# Add the serverless-webpack plugin
+plugins:
+  - serverless-webpack
+  - serverless-dynamodb-local
+  - serverless-offline
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+
+functions:
+  createPublisher:
+    handler: lib/functions/create-publisher.js
+    events:
+      - http:
+          method: post
+          path: publisher
+
+  createSubscriber:
+    handler: lib/functions/create-subscriber.js
+    events:
+      - http:
+          method: post
+          path: subscriber
+
+  createSubscription:
+    handler: lib/functions/create-subscription.js
+    events:
+      - http:
+          method: post
+          path: subscription
+
+  createNotification:
+    handler: lib/functions/create-notification.js
+    events:
+      - http:
+          method: post
+          path: notification
