@@ -1,24 +1,19 @@
-import { APIGatewayProxyHandler, APIGatewayEvent } from 'aws-lambda'
+import { APIGatewayProxyHandler, APIGatewayEvent as RawAPIGatewayEvent } from 'aws-lambda'
 import { UserError, InvalidParameter } from './errors'
+import { ParsedAPIGatewayEvent } from './types'
+import { parseEvent } from './parse-event'
 
-type ApiGWEventHandler<T> = (event:APIGatewayEvent) => Promise<T>
+type ApiGWEventHandler<T> = (event: ParsedAPIGatewayEvent) => Promise<T>
 type ErrorBody = {
   message?: string
 }
 
-const parseBody = (body: string) => {
-  try {
-    return JSON.parse(body)
-  } catch (err) {
-    throw new InvalidParameter('expected JSON body')
-  }
-}
-
-export const wrapHandler = <T>(handler:ApiGWEventHandler<T>):APIGatewayProxyHandler => async event => {
-  let body: T|ErrorBody = null
+export const wrapHandler = <T>(handler: ApiGWEventHandler<T>): APIGatewayProxyHandler => async event => {
+  let body: T | ErrorBody = null
   let statusCode = 200
   try {
-    body = await handler(parseBody(event.body))
+    const parsedEvent: ParsedAPIGatewayEvent = parseEvent(event)
+    body = await handler(parsedEvent)
   } catch (err) {
     if (err instanceof UserError) {
       statusCode = 400
@@ -31,6 +26,6 @@ export const wrapHandler = <T>(handler:ApiGWEventHandler<T>):APIGatewayProxyHand
 
   return {
     statusCode,
-    body: JSON.stringify(body),
+    body: JSON.stringify(body)
   }
 }

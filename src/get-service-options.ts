@@ -3,12 +3,12 @@ import { localstack } from './localstack'
 import { CloudEndpointType } from './types'
 
 interface GetServiceOptionsOpts {
-  endpointType: CloudEndpointType
+  local: boolean
   service: string
 }
 
-export const getServiceOptions = ({ endpointType, service }: GetServiceOptionsOpts) => {
-  if (endpointType === CloudEndpointType.localstack) {
+export const getServiceOptions = ({ local, service }: GetServiceOptionsOpts) => {
+  if (local) {
     return {
       endpoint: localstack[service],
     }

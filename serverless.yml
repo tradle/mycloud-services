@@ -4,7 +4,7 @@ service:
 # Add the serverless-webpack plugin
 plugins:
   - serverless-webpack
-  - serverless-dynamodb-local
+  # - serverless-dynamodb-local
   - serverless-offline
 
 provider:
@@ -39,3 +39,17 @@ functions:
       - http:
           method: post
           path: notification
+
+  clearBadge:
+    handler: lib/functions/clear-badge.js
+    events:
+      - http:
+          method: post
+          path: clearbadge
+
+  saveUserLog:
+    handler: lib/functions/save-user-log.js
+    events:
+      - http:
+          method: post
+          path: userlog

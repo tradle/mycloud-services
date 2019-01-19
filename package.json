@@ -4,11 +4,16 @@
   "description": "Tradle MyCloud services",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "tape lib/test/*.js",
+    "tswatch": "tsc -w"
   },
   "dependencies": {
     "@tradle/dynamodb": "github:tradle/dynamodb",
+    "@tradle/engine": "~8.1.0",
     "@tradle/errors": "~1.1.1",
+    "@tradle/models": "github:tradle/models",
+    "@tradle/protocol": "~5.1.0",
+    "@tradle/schema-joi": "github:tradle/schema-joi",
     "@types/aws-sdk": "~2.7.0",
     "node-pushnotifications": "~1.1.8",
     "pino": "~5.10.7"
@@ -17,12 +22,14 @@
     "@types/aws-lambda": "8.10.1",
     "@types/node": "^8.0.57",
     "@types/pino": "~5.8.3",
+    "@types/tape": "~4.2.33",
     "serverless-offline": "~4.1.4",
     "serverless-webpack": "^5.1.1",
     "source-map-support": "~0.5.10",
+    "tape": "~4.9.2",
     "ts-loader": "^4.2.0",
     "tslib": "~1.9.3",
-    "typescript": "^2.9.2",
+    "typescript": "~3.2.4",
     "webpack": "^4.5.0"
   },
   "author": "mvayngrib",

@@ -1,5 +1,7 @@
-
 import { wrapHandler } from '../apigw-lambda'
-import { createNotification } from '../create-notification'
+import { createHandler, CreateNotificationOpts } from '../actions/create-notification'
+import { createContext } from '../create-context'
 
-export const handler = wrapHandler(createNotification)
+const rawHandler = createHandler(createContext())
+
+export const handler = wrapHandler(({ body }) => rawHandler((body as unknown) as CreateNotificationOpts))
