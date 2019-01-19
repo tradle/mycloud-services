@@ -1,33 +1,20 @@
-import crypto from 'crypto'
-import tradle from '@tradle/protocol'
-import { validateSig } from '../validate-sig'
+import pick from 'lodash/pick'
 import { DB, Identity, PublicKey } from '../types'
 import * as Errors from '../errors'
+import * as crypto from '../crypto'
 
 export interface Context {
   db: DB
 }
 
-export interface CreatePublisherHandlerOpts {
+export interface CreatePublisherOpts {
   identity: Identity
   key: PublicKey
 }
 
-export interface CreatePublisherOpts extends CreatePublisherHandlerOpts {
-  db: DB
+export const createHandler = ({ db }: Context) => async ({ identity, key }: CreatePublisherOpts) => {
+  crypto.validateSig({ object: identity, identity })
+  const link = crypto.getObjectLink(identity)
+  const nonce = crypto.genNonceForPublisher()
+  await db.createPublisher({ nonce, link, key: pick(key, ['pub', 'curve']) })
 }
-
-export const createPublisher = async ({ db, identity, key }: CreatePublisherOpts) => {
-  try {
-    validateSig({ object: identity, identity })
-  } catch (err) {
-    throw new Errors.InvalidParameter('invalid identity')
-  }
-
-  const link = tradle.linkString(identity)
-  const nonce = crypto.randomBytes(32).toString('base64')
-  await db.createPublisher({ nonce, link, key })
-}
-
-export const createHandler = ({ db }: Context) => ({ identity, key }: CreatePublisherHandlerOpts) =>
-  createPublisher({ db, identity, key })

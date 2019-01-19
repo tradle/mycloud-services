@@ -1,6 +1,6 @@
 import tradle from '@tradle/protocol'
 import { Identity, PushProtocol, DB, SignedTradleObject } from '../types'
-import { validateSig } from '../validate-sig'
+import * as crypto from '../crypto'
 import * as Errors from '../errors'
 import { PUSH_PROTOCOLS } from '../constants'
 
@@ -25,30 +25,26 @@ export const addTokenForSubscriber = async ({ db, subscriber, token, protocol }:
   throw new Errors.NotImplemented('implement me!')
 }
 
-export const createHandler = ({ db }: Context) => async (subscriber: CreateSubscriberOpts) => {
+export const validateSubscriber = (subscriber: CreateSubscriberOpts) => {
   const { identity, token, protocol } = subscriber
-  try {
-    validateSig({ object: identity, identity })
-  } catch (err) {
-    throw new Errors.InvalidParameter('invalid identity')
-  }
-
-  try {
-    validateSig({ object: subscriber, identity })
-  } catch (err) {
-    throw new Errors.InvalidParameter('invalid signature')
-  }
+  crypto.validateSig({ object: identity, identity })
+  crypto.validateSig({ object: subscriber, identity })
 
   // TODO: verify
   if (!PUSH_PROTOCOLS.includes(protocol)) {
-    throw new Errors.InvalidParameter(`unsupported protocol: ${protocol}`)
+    throw new Errors.InvalidOption(`unsupported protocol: ${protocol}`)
   }
 
   if (!token) {
-    throw new Errors.InvalidParameter('expected "token"')
+    throw new Errors.InvalidOption('expected "token"')
   }
+}
 
+export const createHandler = ({ db }: Context) => async (subscriber: CreateSubscriberOpts) => {
+  validateSubscriber(subscriber)
+
+  const { identity, token, protocol } = subscriber
   const { link, permalink } = tradle.links({ object: identity })
   // add device token for subscriber permalink
-  await addTokenForSubscriber({ db, subscriber: permalink, token, protocol })
+  await db.addSubscriberDevice({ subscriber: permalink, token, protocol })
 }

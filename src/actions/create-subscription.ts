@@ -9,4 +9,8 @@ export interface CreateSubscriptionOpts extends SignedTradleObject {
   subscriber: string
 }
 
-export const createHandler = (ctx: Context) => async (opts: CreateSubscriptionOpts) => {}
+export const createHandler = ({ db }: Context) => async (opts: CreateSubscriptionOpts) => {
+  // your code here
+  //
+  // await db.createSubscription(...)
+}

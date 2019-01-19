@@ -12,7 +12,7 @@ const validateQueryModule = ({ name, wrap }: Query) => {
   if (typeof wrap !== 'function') throw new Error('expected function "wrap"')
 }
 
-fs.readdirSync('./').forEach(file => {
+fs.readdirSync(__dirname).forEach(file => {
   const { ext, base } = path.parse(file)
   if (ext === '.js' && base !== 'index.js') {
     const query = require(`./${file}`) as Query
@@ -21,4 +21,4 @@ fs.readdirSync('./').forEach(file => {
   }
 })
 
-export = queries
+export { queries }

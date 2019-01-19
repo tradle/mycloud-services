@@ -8,18 +8,14 @@ export { DBHandle }
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
 
 export interface PublicKey {
-  type: string
   pub: string
   curve: string
-  fingerprint: string
+  // type: string
+  // fingerprint: string
   [x: string]: string
 }
 
 type PublicKeys = PublicKey[]
-
-export interface Identity {
-  pubkeys: PublicKeys
-}
 
 export interface KeyValueStore {
   put: (key: string, value: any) => Promise<void>
@@ -63,6 +59,10 @@ export interface SignedTradleObject extends UnsignedTradleObject {
   _sigPubKey?: string
 }
 
+export interface Identity extends SignedTradleObject {
+  pubkeys: PublicKeys
+}
+
 declare namespace Queries {
   export interface CreatePublisherOpts {}
   export type CreatePublisher = (opts: CreatePublisherOpts) => Promise<void>
@@ -72,12 +72,16 @@ declare namespace Queries {
 
   export interface CreateSubscriptionOpts {}
   export type CreateSubscription = (opts: CreateSubscriptionOpts) => Promise<void>
+
+  export interface AddSubscriberDeviceOpts {}
+  export type AddSubscriberDevice = (opts: AddSubscriberDeviceOpts) => Promise<void>
 }
 
 export interface DB {
   createPublisher: Queries.CreatePublisher
   createSubscriber: Queries.CreateSubscriber
   createSubscription: Queries.CreateSubscription
+  addSubscriberDevice: Queries.AddSubscriberDevice
 }
 
 export { Queries }

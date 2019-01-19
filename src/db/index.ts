@@ -1,4 +1,4 @@
-import * as queries from './queries'
+import { queries } from './queries'
 import { DBHandle, DB } from '../types'
 
 export const createClient = (db: DBHandle): DB => {

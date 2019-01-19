@@ -1,1 +1,1 @@
-export { models } from '@tradle/models-mycloud-services'
+export { models } from '@tradle/models-cloud-services'

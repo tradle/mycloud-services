@@ -1,7 +1,12 @@
 import { APIGatewayProxyHandler, APIGatewayEvent as RawAPIGatewayEvent } from 'aws-lambda'
-import { UserError, InvalidParameter } from './errors'
+import { UserError, InvalidOption } from './errors'
 import { ParsedAPIGatewayEvent } from './types'
 import { parseEvent } from './parse-event'
+import { createLogger } from './logger'
+
+const logger = createLogger({
+  level: 'debug'
+})
 
 type ApiGWEventHandler<T> = (event: ParsedAPIGatewayEvent) => Promise<T>
 type ErrorBody = {
@@ -19,6 +24,7 @@ export const wrapHandler = <T>(handler: ApiGWEventHandler<T>): APIGatewayProxyHa
       statusCode = 400
       body = { message: err.message }
     } else {
+      logger.error(err)
       statusCode = 500
       body = { message: 'something went wrong' }
     }

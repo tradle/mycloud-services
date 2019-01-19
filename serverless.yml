@@ -1,54 +1,65 @@
 service:
   name: tradle-mycloud-services
 
-# Add the serverless-webpack plugin
 plugins:
-  - serverless-webpack
+  # - serverless-webpack
   # - serverless-dynamodb-local
   - serverless-offline
 
 provider:
   name: aws
+  stage: dev
   runtime: nodejs8.10
+  region: ${self:custom.region}
+  environment:
+    TABLE_NAME: 'tdl-superawesome-ltd-dev-bucket-0'
+    S3_USER_LOG_PREFIX: 'tdl-superawesome-ltd-dev-logs/userlogs'
+    LOG_LEVEL: 'debug'
+    AWS_REGION: ${self:provider.region}
+
+custom:
+  region: 'us-east-1'
+  serverless-offline:
+    port: 31013
 
 functions:
   createPublisher:
-    handler: lib/functions/create-publisher.js
+    handler: lib/functions/create-publisher.handler
     events:
       - http:
           method: post
           path: publisher
 
   createSubscriber:
-    handler: lib/functions/create-subscriber.js
+    handler: lib/functions/create-subscriber.handler
     events:
       - http:
           method: post
           path: subscriber
 
   createSubscription:
-    handler: lib/functions/create-subscription.js
+    handler: lib/functions/create-subscription.handler
     events:
       - http:
           method: post
           path: subscription
 
   createNotification:
-    handler: lib/functions/create-notification.js
+    handler: lib/functions/create-notification.handler
     events:
       - http:
           method: post
           path: notification
 
   clearBadge:
-    handler: lib/functions/clear-badge.js
+    handler: lib/functions/clear-badge.handler
     events:
       - http:
           method: post
           path: clearbadge
 
   saveUserLog:
-    handler: lib/functions/save-user-log.js
+    handler: lib/functions/save-user-log.handler
     events:
       - http:
           method: post
