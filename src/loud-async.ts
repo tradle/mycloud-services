@@ -1,4 +1,4 @@
-type AsyncFn = (...any) => Promise<any | void>
+import { AsyncFn } from '@localtypes'
 
 export const loudAsync = (asyncFn: AsyncFn) => async (...args) => {
   try {

@@ -1,16 +1,19 @@
 import AWS from 'aws-sdk'
-import { createClient as createDB } from './db'
 import { createHandle } from './db/handle'
+import { create as createSubscriber } from './domain/subscriber'
+import { create as createPublisher } from './domain/publisher'
+import { create as createSubscriberDB } from './db/subscriber'
+import { create as createPublisherDB } from './db/publisher'
 import { createStore as createS3KeyValueStore } from './s3-kv'
 import { createStore as createLogStore } from './log-store'
 import { getServiceOptions as getBaseServiceOptions } from './get-service-options'
 import { createTableDefinition } from './table-definition'
-import { DB, Config, Context } from './types'
+import { Config, Context } from './types'
 import { createLogger } from './logger'
-import { createConfig } from './config'
+import { create as createConfig } from './config'
 import { createClient } from 'http'
 
-export const createContext = (config: Config = createConfig()): Context => {
+export const create = (config: Config = create()): Context => {
   const { local, region, s3UserLogPrefix, tableName, logLevel } = config
   const logger = createLogger({
     level: logLevel
@@ -35,7 +38,6 @@ export const createContext = (config: Config = createConfig()): Context => {
     logger
   })
 
-  const db = createDB(dbHandle)
   const s3 = new AWS.S3(getServiceOptions('s3'))
   const s3KVStore = createS3KeyValueStore({
     client: s3,
@@ -44,7 +46,12 @@ export const createContext = (config: Config = createConfig()): Context => {
 
   const logStore = createLogStore(s3KVStore)
   return {
-    db,
+    subscriber: createSubscriber({
+      db: createSubscriberDB({ db: dbHandle })
+    }),
+    publisher: createPublisher({
+      db: createPublisherDB({ db: dbHandle })
+    }),
     logStore
   }
 }

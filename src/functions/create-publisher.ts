@@ -1,19 +1,17 @@
 import { wrapHandler } from '../apigw-lambda'
-import { create as createRegHandler, CreatePublisherOpts } from '../actions/create-publisher'
-import { create as createConfirmHandler, ConfirmPublisherOpts } from '../actions/confirm-publisher'
-import { createContext } from '../create-context'
+import { create as createPublisher } from '../domain/publisher'
+import { create as createContext } from '../context'
 import * as Errors from '../errors'
 
-const context = createContext()
-const regHandler = createRegHandler(context)
-const confirmHandler = createConfirmHandler(context)
+const publisher = createPublisher(createContext())
 
-export const handler = wrapHandler(({ body }) => {
+export const handler = wrapHandler(async ({ body }) => {
   if (!body) throw new Errors.InvalidOption(`request is missing body`)
 
   if ('sig' in body) {
-    return confirmHandler((body as unknown) as ConfirmPublisherOpts)
+    return publisher.confirm(body as any)
   }
 
-  return regHandler((body as unknown) as CreatePublisherOpts)
+  const { challenge } = await publisher.register(body as any)
+  return challenge
 })

@@ -17,6 +17,7 @@
     "@tradle/validate-model": "~7.1.2",
     "@tradle/validate-resource": "~4.3.0",
     "@types/aws-sdk": "~2.7.0",
+    "@types/lodash": "~4.14.120",
     "lodash": "~4.17.11",
     "nkey-ecdsa": "~1.1.0",
     "node-pushnotifications": "~1.1.8",

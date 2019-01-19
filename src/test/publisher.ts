@@ -4,13 +4,14 @@ import test from 'tape'
 import sinon from 'sinon'
 import pick from 'lodash/pick'
 import { loudAsync } from '../loud-async'
-import { create } from '../actions/create-publisher'
-import { DB, Identity, PublicKey } from '../types'
+import { create as createPublisher } from '../domain/publisher'
+import { Identity, PublicKey } from '@localtypes'
 import * as crypto from '../crypto'
+import { Publisher } from 'src/db/publisher'
 
 // f u Prettier!
 test(
-  'create-publisher',
+  'create publisher',
   loudAsync(async (t: test.Test) => {
     const sandbox = sinon.createSandbox()
     const link = 'somelink'
@@ -21,17 +22,17 @@ test(
     sandbox.stub(crypto, 'validateSig').resolves()
 
     const db = {
-      createPublisher: async opts => {
+      register: async opts => {
         // TODO: actually validate
         t.same(opts, { nonce, link, key: pick(key, ['pub', 'curve']) })
       }
-    } as DB
+    } as Publisher
 
-    const createPublisher = create({ db })
+    const publisher = createPublisher({ db })
     const key: PublicKey = { pub: 'ha', curve: 'blah', ho: 'hey' }
     const identity = { pubkeys: [key], _t: 'tradle.Identity' } as Identity
 
-    await createPublisher({ identity, key })
+    const {} = await publisher.register({ identity, key })
     sandbox.restore()
 
     t.end()

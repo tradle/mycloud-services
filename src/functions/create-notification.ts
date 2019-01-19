@@ -1,7 +1,7 @@
 import { wrapHandler } from '../apigw-lambda'
-import { create, CreateNotificationOpts } from '../actions/create-notification'
-import { createContext } from '../create-context'
+import { create as createPublisher, NotifyOpts } from '../domain/publisher'
+import { create as createContext } from '../context'
 
-const rawHandler = create(createContext())
+const publisher = createPublisher(createContext())
 
-export const handler = wrapHandler(({ body }) => rawHandler((body as unknown) as CreateNotificationOpts))
+export const handler = wrapHandler(({ body }) => publisher.notify((body as unknown) as NotifyOpts))

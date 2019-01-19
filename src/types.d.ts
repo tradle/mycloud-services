@@ -1,4 +1,6 @@
 import { DB as DBHandle } from '@tradle/dynamodb'
+import { Publisher } from './domain/publisher'
+import { Subscriber } from './domain/subscriber'
 
 export { Config } from './config'
 export { PushProtocol } from './constants'
@@ -6,6 +8,7 @@ export { PushProtocol } from './constants'
 export { DBHandle }
 
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
+export type AsyncFn = (...any) => Promise<any | void>
 
 export interface PublicKey {
   pub: string
@@ -27,7 +30,8 @@ export interface LogStore {
 }
 
 export interface Context {
-  db: DB
+  subscriber: Subscriber
+  publisher: Publisher
   logStore: LogStore
 }
 
@@ -62,26 +66,3 @@ export interface SignedTradleObject extends UnsignedTradleObject {
 export interface Identity extends SignedTradleObject {
   pubkeys: PublicKeys
 }
-
-declare namespace Queries {
-  export interface CreatePublisherOpts {}
-  export type CreatePublisher = (opts: CreatePublisherOpts) => Promise<void>
-
-  export interface CreateSubscriberOpts {}
-  export type CreateSubscriber = (opts: CreateSubscriberOpts) => Promise<void>
-
-  export interface CreateSubscriptionOpts {}
-  export type CreateSubscription = (opts: CreateSubscriptionOpts) => Promise<void>
-
-  export interface AddSubscriberDeviceOpts {}
-  export type AddSubscriberDevice = (opts: AddSubscriberDeviceOpts) => Promise<void>
-}
-
-export interface DB {
-  createPublisher: Queries.CreatePublisher
-  createSubscriber: Queries.CreateSubscriber
-  createSubscription: Queries.CreateSubscription
-  addSubscriberDevice: Queries.AddSubscriberDevice
-}
-
-export { Queries }

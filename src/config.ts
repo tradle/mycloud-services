@@ -2,7 +2,7 @@ require('../source-map-install')
 
 import { Level } from 'pino'
 import withDefaults from 'lodash/defaults'
-import * as assert from './assert'
+import * as assert from '@assert'
 
 export interface Config {
   local: boolean
@@ -29,11 +29,11 @@ const defaults: Partial<Config> = {
   region: 'us-east-1'
 }
 
-export const validateConfig = (config: Config) => {
+export const validate = (config: Config) => {
   assert.requireOptions(config, ConfigAttrs)
 }
 
-export const createConfig = (env = process.env) => {
+export const create = (env = process.env) => {
   const config = withDefaults(
     {
       local: !!env.SERVERLESS_OFFLINE,
@@ -46,6 +46,6 @@ export const createConfig = (env = process.env) => {
     defaults
   )
 
-  validateConfig(config)
+  validate(config)
   return config
 }

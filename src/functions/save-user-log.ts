@@ -1,11 +1,13 @@
 import { wrapHandler } from '../apigw-lambda'
-import { create, SaveUserLogOpts } from '../actions/save-user-log'
-import { createContext } from '../create-context'
+import { create as createUserLogs } from '../domain/user-logs'
+import { create as createContext } from '../context'
 
-const rawHandler = create(createContext())
+const userLogs = createUserLogs({
+  store: createContext().logStore
+})
 
 export const handler = wrapHandler(({ body, query }) =>
-  rawHandler({
+  userLogs.put({
     firstName: query.firstName,
     lastName: query.lastName,
     log: body

@@ -9,7 +9,7 @@ const logger = createLogger({
 })
 
 type ApiGWEventHandler<T> = (event: ParsedAPIGatewayEvent) => Promise<T>
-type ErrorBody = {
+interface ErrorBody {
   message?: string
 }
 

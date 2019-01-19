@@ -1,7 +1,7 @@
 import { wrapHandler } from '../apigw-lambda'
-import { create, CreateSubscriptionOpts } from '../actions/create-subscription'
-import { createContext } from '../create-context'
+import { create as createSubscriber } from '../domain/subscriber'
+import { create as createContext } from '../context'
 
-const rawHandler = create(createContext())
+const subscriber = createSubscriber(createContext())
 
-export const handler = wrapHandler(({ body }) => rawHandler((body as unknown) as CreateSubscriptionOpts))
+export const handler = wrapHandler(({ body }) => subscriber.createSubscription(body as any))

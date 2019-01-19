@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk'
 import { createDB, createTable, createModelStore, ILogger } from '@tradle/dynamodb'
 import { models } from '../models'
-import { TableDefinition } from '../types'
+import { TableDefinition } from '@localtypes'
 
 interface CreateHandleOpts {
   dynamodb: AWS.DynamoDB
