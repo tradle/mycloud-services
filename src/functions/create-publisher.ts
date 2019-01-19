@@ -1,12 +1,10 @@
 import { wrapHandler } from '../apigw-lambda'
-import { createHandler as createRegHandler, CreatePublisherOpts } from '../actions/create-publisher'
-import { createHandler as createConfirmHandler, ConfirmPublisherOpts } from '../actions/confirm-publisher'
+import { create as createRegHandler, CreatePublisherOpts } from '../actions/create-publisher'
+import { create as createConfirmHandler, ConfirmPublisherOpts } from '../actions/confirm-publisher'
 import { createContext } from '../create-context'
-import { createConfig } from '../config'
 import * as Errors from '../errors'
 
-const config = createConfig()
-const context = createContext(config)
+const context = createContext()
 const regHandler = createRegHandler(context)
 const confirmHandler = createConfirmHandler(context)
 

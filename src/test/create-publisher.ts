@@ -4,7 +4,7 @@ import test from 'tape'
 import sinon from 'sinon'
 import pick from 'lodash/pick'
 import { loudAsync } from '../loud-async'
-import { createHandler } from '../actions/create-publisher'
+import { create } from '../actions/create-publisher'
 import { DB, Identity, PublicKey } from '../types'
 import * as crypto from '../crypto'
 
@@ -27,7 +27,7 @@ test(
       }
     } as DB
 
-    const createPublisher = createHandler({ db })
+    const createPublisher = create({ db })
     const key: PublicKey = { pub: 'ha', curve: 'blah', ho: 'hey' }
     const identity = { pubkeys: [key], _t: 'tradle.Identity' } as Identity
 

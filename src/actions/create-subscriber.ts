@@ -40,7 +40,7 @@ export const validateSubscriber = (subscriber: CreateSubscriberOpts) => {
   }
 }
 
-export const createHandler = ({ db }: Context) => async (subscriber: CreateSubscriberOpts) => {
+export const create = ({ db }: Context) => async (subscriber: CreateSubscriberOpts) => {
   validateSubscriber(subscriber)
 
   const { identity, token, protocol } = subscriber

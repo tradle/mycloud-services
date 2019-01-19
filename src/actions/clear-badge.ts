@@ -8,4 +8,4 @@ export interface ClearBadgeOpts {
   subscriber: string
 }
 
-export const createHandler = (ctx: Context) => async (opts: ClearBadgeOpts) => {}
+export const create = (ctx: Context) => async (opts: ClearBadgeOpts) => {}

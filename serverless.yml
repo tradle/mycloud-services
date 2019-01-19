@@ -8,9 +8,9 @@ plugins:
 
 provider:
   name: aws
-  stage: dev
   runtime: nodejs8.10
   region: ${self:custom.region}
+  stage: dev
   environment:
     TABLE_NAME: 'tdl-superawesome-ltd-dev-bucket-0'
     S3_USER_LOG_PREFIX: 'tdl-superawesome-ltd-dev-logs/userlogs'

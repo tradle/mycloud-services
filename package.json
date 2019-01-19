@@ -27,6 +27,7 @@
     "@types/node": "^8.0.57",
     "@types/pino": "~5.8.3",
     "@types/tape": "~4.2.33",
+    "prettier": "~1.15.3",
     "serverless-offline": "~4.1.4",
     "serverless-webpack": "^5.1.1",
     "sinon": "~7.2.3",
@@ -34,6 +35,8 @@
     "tape": "~4.9.2",
     "ts-loader": "^4.2.0",
     "tslib": "~1.9.3",
+    "tslint": "~5.12.1",
+    "tslint-config-prettier": "~1.17.0",
     "typescript": "~3.2.4",
     "webpack": "^4.5.0"
   },

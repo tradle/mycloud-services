@@ -10,4 +10,4 @@ export interface ConfirmPublisherOpts {
   sig: string
 }
 
-export const createHandler = (ctx: Context) => async (opts: ConfirmPublisherOpts) => {}
+export const create = (ctx: Context) => async (opts: ConfirmPublisherOpts) => {}

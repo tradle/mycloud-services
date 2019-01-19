@@ -12,7 +12,7 @@ export interface CreatePublisherOpts {
   key: PublicKey
 }
 
-export const createHandler = ({ db }: Context) => async ({ identity, key }: CreatePublisherOpts) => {
+export const create = ({ db }: Context) => async ({ identity, key }: CreatePublisherOpts) => {
   crypto.validateSig({ object: identity, identity })
   const link = crypto.getObjectLink(identity)
   const nonce = crypto.genNonceForPublisher()

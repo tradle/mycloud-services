@@ -6,4 +6,4 @@ export interface Context {
 
 export interface CreateNotificationOpts {}
 
-export const createHandler = (ctx: Context) => async (opts: CreateNotificationOpts) => {}
+export const create = (ctx: Context) => async (opts: CreateNotificationOpts) => {}

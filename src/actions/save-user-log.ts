@@ -14,6 +14,6 @@ export const getISODate = () => new Date().toISOString()
 export const getKeyForEvent = ({ firstName, lastName, log }: SaveUserLogOpts) =>
   `${getISODate()} ${firstName} ${lastName}.txt`
 
-export const createHandler = ({ logStore }: Context) => async (opts: SaveUserLogOpts) => {
+export const create = ({ logStore }: Context) => async (opts: SaveUserLogOpts) => {
   await logStore.putUserLog(getKeyForEvent(opts), opts.log)
 }
