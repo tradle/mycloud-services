@@ -11,7 +11,7 @@
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {
-      "@localtypes": ["src/types.d.ts"]
+      "@localtypes": ["src/types.ts"]
       //   "@errors": ["src/errors.ts"],
       //   "@assert": ["src/assert.ts"]
     }

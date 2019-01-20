@@ -1,6 +1,5 @@
 
 import { localstack } from './localstack'
-import { CloudEndpointType } from './types'
 
 interface GetServiceOptionsOpts {
   local: boolean

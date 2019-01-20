@@ -1,35 +1,46 @@
 import pick from 'lodash/pick'
-import { Identity, PublicKey } from '@localtypes'
+import { IdentityV, ECPubKeyV } from '../types'
+import * as t from 'io-ts'
 import { Publisher as PublisherStorage } from '../db/publisher'
 import * as Errors from '../errors'
 import * as crypto from '../crypto'
+import * as assert from '../assert'
 
-export interface Context {
+export interface PublisherOpts {
   db: PublisherStorage
 }
 
-export interface RegisterPublisherOpts {
-  identity: Identity
-  key: PublicKey
-}
+export const RegisterPublisherOptsV = t.type({
+  identity: IdentityV,
+  key: ECPubKeyV
+})
 
-export interface ConfirmPublisherOpts {
-  nonce: string
-  salt: string
-  sig: string
-}
+export type RegisterPublisherOpts = t.TypeOf<typeof RegisterPublisherOptsV>
 
-export interface NotifyOpts {
-  subscriber: string
-}
+export const ConfirmPublisherOptsV = t.type({
+  nonce: t.string,
+  salt: t.string,
+  sig: t.string
+})
+
+export type ConfirmPublisherOpts = t.TypeOf<typeof ConfirmPublisherOptsV>
+
+export const NotifyOptsV = t.type({
+  subscriber: t.string
+})
+
+export type NotifyOpts = t.TypeOf<typeof NotifyOptsV>
 
 export class Publisher {
   private db: PublisherStorage
-  constructor({ db }: Context) {
+  constructor({ db }: PublisherOpts) {
     this.db = db
   }
 
-  public register = async ({ identity, key }: RegisterPublisherOpts) => {
+  public register = async (opts: RegisterPublisherOpts) => {
+    assert.isTypeOf(opts, RegisterPublisherOptsV)
+
+    const { identity, key } = opts
     crypto.validateSig({ object: identity, identity })
     const link = crypto.getObjectLink(identity)
     const challenge = crypto.genChallengeForPublisher()
@@ -40,12 +51,14 @@ export class Publisher {
   }
 
   public confirm = async (opts: ConfirmPublisherOpts) => {
+    assert.isTypeOf(opts, ConfirmPublisherOptsV)
     throw new Errors.NotImplemented('implement me!')
   }
 
   public notify = async (opts: NotifyOpts) => {
+    assert.isTypeOf(opts, NotifyOptsV)
     throw new Errors.NotImplemented('implement me!')
   }
 }
 
-export const create = (ctx: Context) => new Publisher(ctx)
+export const create = (ctx: PublisherOpts) => new Publisher(ctx)

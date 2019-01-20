@@ -24,42 +24,42 @@ custom:
 
 functions:
   createPublisher:
-    handler: lib/functions/create-publisher.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post
           path: publisher
 
   createSubscriber:
-    handler: lib/functions/create-subscriber.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post
           path: subscriber
 
   createSubscription:
-    handler: lib/functions/create-subscription.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post
           path: subscription
 
   createNotification:
-    handler: lib/functions/create-notification.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post
           path: notification
 
   clearBadge:
-    handler: lib/functions/clear-badge.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post
           path: clearbadge
 
   saveUserLog:
-    handler: lib/functions/save-user-log.handler
+    handler: lib/root-handler.handler
     events:
       - http:
           method: post

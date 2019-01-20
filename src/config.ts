@@ -1,51 +1,41 @@
+import path from 'path'
+
 require('../source-map-install')
+require('dotenv').config({
+  path: path.resolve(__dirname, '../.env')
+})
 
-import { Level } from 'pino'
 import withDefaults from 'lodash/defaults'
+import { Config, ConfigV, LogLevel } from './types'
 import * as assert from './assert'
-
-export interface Config {
-  local: boolean
-  tableName: string
-  // bucket/path/to/userlogs
-  s3UserLogPrefix: string
-  logLevel: Level | 'silly'
-  region: string
-  functionName: string
-}
-
-// better use io-ts or something
-const ConfigAttrs: assert.AttrTypeMap = {
-  local: 'boolean',
-  tableName: 'string',
-  s3UserLogPrefix: 'string',
-  logLevel: 'string',
-  region: 'string'
-  // functionName: 'string' // optional
-}
 
 const defaults: Partial<Config> = {
   logLevel: 'info',
   region: 'us-east-1'
 }
 
-export const validate = (config: Config) => {
-  assert.requireOptions(config, ConfigAttrs)
-}
-
-export const create = (env = process.env) => {
+export const validateConfig = (config: Config) => assert.isTypeOf(config, ConfigV)
+export const createConfig = (env = process.env) => {
+  const { NODE_ENV = 'development' } = env
   const config = withDefaults(
     {
-      local: !!env.SERVERLESS_OFFLINE,
+      local: !env.AWS_REGION,
+      usingServerlessOffline: !!env.SERVERLESS_OFFLINE,
+      env: NODE_ENV,
+      production: NODE_ENV === 'production',
+      development: NODE_ENV === 'development',
+      test: NODE_ENV === 'test',
       tableName: env.TABLE_NAME,
       s3UserLogPrefix: env.S3_USER_LOG_PREFIX,
-      logLevel: env.LOG_LEVEL as Level,
+      logLevel: env.LOG_LEVEL as LogLevel,
       region: env.AWS_REGION,
       functionName: env.AWS_LAMBDA_FUNCTION_NAME
     },
     defaults
-  )
+  ) as Config
 
-  validate(config)
+  validateConfig(config)
   return config
 }
+
+createConfig()

@@ -9,12 +9,12 @@ import { createStore as createS3KeyValueStore } from './s3-kv'
 import { createStore as createLogStore } from './log-store'
 import { getServiceOptions as getBaseServiceOptions } from './get-service-options'
 import { createTableDefinition } from './table-definition'
-import { Config, Context } from './types'
+import { Config, Container } from './types'
 import { createLogger } from './logger'
-import { create as createConfig } from './config'
-import { createClient } from 'http'
+import { createConfig } from './config'
+import { create as createContainerMiddleware } from './interfaces/http/middleware/container'
 
-export const create = (config: Config = create()): Context => {
+export const createContainer = (config: Config = createConfig()): Container => {
   const { local, region, s3UserLogPrefix, tableName, logLevel } = config
   const logger = createLogger({
     level: logLevel
@@ -55,9 +55,16 @@ export const create = (config: Config = create()): Context => {
   })
 
   const userLogs = createUserLogs({ store: logStore })
-  return {
+  const container: Container = {
+    db: dbHandle,
     subscriber,
     publisher,
-    userLogs
+    userLogs,
+    config,
+    logger,
+    containerMiddleware: null
   }
+
+  container.containerMiddleware = createContainerMiddleware(container)
+  return container
 }
