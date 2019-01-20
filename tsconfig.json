@@ -11,9 +11,9 @@
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {
-      "@localtypes": ["src/types.d.ts"],
-      "@errors": ["src/errors.ts"],
-      "@assert": ["src/assert.ts"]
+      "@localtypes": ["src/types.d.ts"]
+      //   "@errors": ["src/errors.ts"],
+      //   "@assert": ["src/assert.ts"]
     }
   },
   "types": ["node", "aws-sdk", "pino", "tape", "sinon", "lodash", "@tradle/dynamodb"],

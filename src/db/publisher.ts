@@ -1,7 +1,7 @@
 import { DBHandle } from '@localtypes'
-import * as Errors from '@errors'
+import * as Errors from '../errors'
 
-interface Context {
+interface PublisherOpts {
   db: DBHandle
 }
 
@@ -23,7 +23,7 @@ export interface ConfirmPublisherOpts {
 
 export class Publisher {
   private db: DBHandle
-  constructor(ctx: Context) {
+  constructor(ctx: PublisherOpts) {
     this.db = ctx.db
   }
 
@@ -36,4 +36,4 @@ export class Publisher {
   }
 }
 
-export const create = (ctx: Context) => new Publisher(ctx)
+export const create = (ctx: PublisherOpts) => new Publisher(ctx)

@@ -1,11 +1,11 @@
 import tradle from '@tradle/protocol'
 import { SignedTradleObject, Identity, PushProtocol } from '@localtypes'
 import { Subscriber as DB } from '../db/subscriber'
-import * as Errors from '@errors'
+import * as Errors from '../errors'
 import * as crypto from '../crypto'
 import { PUSH_PROTOCOLS } from '../constants'
 
-export interface Context {
+export interface SubscriberOpts {
   db: DB
 }
 
@@ -47,7 +47,7 @@ export class Subscriber {
   }
 
   private db: DB
-  constructor({ db }: Context) {
+  constructor({ db }: SubscriberOpts) {
     this.db = db
   }
 
@@ -60,7 +60,7 @@ export class Subscriber {
     await this.db.addDevice({ subscriber: permalink, token, protocol })
   }
 
-  public addTokenForSubscriber = async ({ subscriber, token, protocol }: AddTokenOpts) => {
+  public addSubscriberDevice = async ({ subscriber, token, protocol }: AddTokenOpts) => {
     throw new Errors.NotImplemented('implement me!')
   }
 
@@ -73,4 +73,4 @@ export class Subscriber {
   }
 }
 
-export const create = (ctx: Context) => new Subscriber(ctx)
+export const create = (ctx: SubscriberOpts) => new Subscriber(ctx)

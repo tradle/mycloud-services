@@ -4,4 +4,4 @@ import { create as createContext } from '../context'
 
 const publisher = createPublisher(createContext())
 
-export const handler = wrapHandler(({ body }) => publisher.notify((body as unknown) as NotifyOpts))
+export const handler = wrapHandler(({ body }) => publisher.notify(body))

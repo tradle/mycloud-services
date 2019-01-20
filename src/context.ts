@@ -2,6 +2,7 @@ import AWS from 'aws-sdk'
 import { createHandle } from './db/handle'
 import { create as createSubscriber } from './domain/subscriber'
 import { create as createPublisher } from './domain/publisher'
+import { create as createUserLogs } from './domain/user-logs'
 import { create as createSubscriberDB } from './db/subscriber'
 import { create as createPublisherDB } from './db/publisher'
 import { createStore as createS3KeyValueStore } from './s3-kv'
@@ -45,13 +46,18 @@ export const create = (config: Config = create()): Context => {
   })
 
   const logStore = createLogStore(s3KVStore)
+  const publisher = createPublisher({
+    db: createPublisherDB({ db: dbHandle })
+  })
+
+  const subscriber = createSubscriber({
+    db: createSubscriberDB({ db: dbHandle })
+  })
+
+  const userLogs = createUserLogs({ store: logStore })
   return {
-    subscriber: createSubscriber({
-      db: createSubscriberDB({ db: dbHandle })
-    }),
-    publisher: createPublisher({
-      db: createPublisherDB({ db: dbHandle })
-    }),
-    logStore
+    subscriber,
+    publisher,
+    userLogs
   }
 }

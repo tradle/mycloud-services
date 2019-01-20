@@ -1,7 +1,7 @@
 import { DBHandle } from '@localtypes'
-import * as Errors from '@errors'
+import * as Errors from '../errors'
 
-interface Context {
+interface SubscriberOpts {
   db: DBHandle
 }
 
@@ -11,7 +11,7 @@ export interface AddDeviceOpts {}
 
 export class Subscriber {
   private db: DBHandle
-  constructor(ctx: Context) {
+  constructor(ctx: SubscriberOpts) {
     this.db = ctx.db
   }
 
@@ -19,7 +19,7 @@ export class Subscriber {
     throw new Errors.NotImplemented('implement me!')
   }
 
-  public createSubscription = async (opts: CreateSubscriberOpts) => {
+  public createSubscription = async (opts: CreateSubscriptionOpts) => {
     throw new Errors.NotImplemented('implement me!')
   }
 
@@ -28,4 +28,4 @@ export class Subscriber {
   }
 }
 
-export const create = (ctx: Context) => new Subscriber(ctx)
+export const create = (ctx: SubscriberOpts) => new Subscriber(ctx)

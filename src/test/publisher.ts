@@ -15,16 +15,16 @@ test(
   loudAsync(async (t: test.Test) => {
     const sandbox = sinon.createSandbox()
     const link = 'somelink'
-    const nonce = 'somenonce'
+    const challenge = 'somenonce'
 
     sandbox.stub(crypto, 'getObjectLink').returns(link)
-    sandbox.stub(crypto, 'genNonceForPublisher').returns(nonce)
+    sandbox.stub(crypto, 'genChallengeForPublisher').returns(challenge)
     sandbox.stub(crypto, 'validateSig').resolves()
 
     const db = {
       register: async opts => {
         // TODO: actually validate
-        t.same(opts, { nonce, link, key: pick(key, ['pub', 'curve']) })
+        t.same(opts, { challenge, link, key: pick(key, ['pub', 'curve']) })
       }
     } as Publisher
 

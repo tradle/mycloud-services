@@ -1,7 +1,3 @@
 import { KeyValueStore, LogStore } from './types'
 
-export const createStore = (store: KeyValueStore): LogStore => {
-  return {
-    putUserLog: store.put
-  }
-}
+export const createStore = (store: KeyValueStore): LogStore => ({ put: store.put })

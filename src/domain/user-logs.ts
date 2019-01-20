@@ -1,27 +1,27 @@
 import { LogStore } from '@localtypes'
 
-interface Context {
+interface UserLogsOpts {
   store: LogStore
 }
 
-export interface SaveUserLogOpts {
+export interface PutUserLogOpts {
   firstName: string
   lastName: string
   log: string
 }
 
 export const getISODate = () => new Date().toISOString()
-export const getKeyForEvent = ({ firstName, lastName, log }: SaveUserLogOpts) =>
+export const getKeyForEvent = ({ firstName, lastName, log }: PutUserLogOpts) =>
   `${getISODate()} ${firstName} ${lastName}.txt`
 
-class UserLogs {
+export class UserLogs {
   private store: LogStore
-  constructor({ store }: Context) {
+  constructor({ store }: UserLogsOpts) {
     this.store = store
   }
-  public put = async (opts: SaveUserLogOpts) => {
-    await this.store.putUserLog(getKeyForEvent(opts), opts.log)
+  public put = async (opts: PutUserLogOpts) => {
+    await this.store.put(getKeyForEvent(opts), opts.log)
   }
 }
 
-export const create = (ctx: Context) => new UserLogs(ctx)
+export const create = (ctx: UserLogsOpts) => new UserLogs(ctx)

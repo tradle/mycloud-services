@@ -2,7 +2,7 @@ require('../source-map-install')
 
 import { Level } from 'pino'
 import withDefaults from 'lodash/defaults'
-import * as assert from '@assert'
+import * as assert from './assert'
 
 export interface Config {
   local: boolean

@@ -1,6 +1,7 @@
 import { DB as DBHandle } from '@tradle/dynamodb'
 import { Publisher } from './domain/publisher'
 import { Subscriber } from './domain/subscriber'
+import { UserLogs } from './domain/user-logs'
 
 export { Config } from './config'
 export { PushProtocol } from './constants'
@@ -26,13 +27,13 @@ export interface KeyValueStore {
 }
 
 export interface LogStore {
-  putUserLog: (key: string, value: string) => Promise<void>
+  put: (key: string, value: string) => Promise<void>
 }
 
 export interface Context {
   subscriber: Subscriber
   publisher: Publisher
-  logStore: LogStore
+  userLogs: UserLogs
 }
 
 export enum CloudEndpointType {

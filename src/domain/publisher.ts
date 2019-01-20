@@ -1,11 +1,11 @@
 import pick from 'lodash/pick'
 import { Identity, PublicKey } from '@localtypes'
-import { Publisher as DB } from '../db/publisher'
-import * as Errors from '@errors'
+import { Publisher as PublisherStorage } from '../db/publisher'
+import * as Errors from '../errors'
 import * as crypto from '../crypto'
 
 export interface Context {
-  db: DB
+  db: PublisherStorage
 }
 
 export interface RegisterPublisherOpts {
@@ -24,7 +24,7 @@ export interface NotifyOpts {
 }
 
 export class Publisher {
-  private db: DB
+  private db: PublisherStorage
   constructor({ db }: Context) {
     this.db = db
   }
