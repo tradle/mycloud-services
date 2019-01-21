@@ -1,5 +1,5 @@
 import serverlessHttp from 'serverless-http'
-import { createRouter } from './interfaces/http/router'
+import { createRouter } from './entrypoint/http/router'
 import { createContainer } from './container'
 
 const container = createContainer()

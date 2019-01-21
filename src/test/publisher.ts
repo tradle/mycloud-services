@@ -4,10 +4,12 @@ import test from 'tape'
 import sinon from 'sinon'
 import pick from 'lodash/pick'
 import { loudAsync } from '../loud-async'
-import { create as createPublisher } from '../domain/publisher'
+import { create as createPublisher } from '../domain/push-notifications/publisher'
 import { Identity, ECPubKey } from '../types'
 import * as crypto from '../crypto'
-import { Publisher } from 'src/db/publisher'
+import { Publisher } from '../db/push-notifications/publisher'
+import models from '../models'
+import * as assert from '../assert'
 
 // f u Prettier!
 test(
@@ -18,18 +20,22 @@ test(
     const challenge = 'somenonce'
 
     sandbox.stub(crypto, 'getObjectLink').returns(link)
-    sandbox.stub(crypto, 'genChallengeForPublisher').returns(challenge)
+    sandbox.stub(crypto, 'genNonce').returns(challenge)
     sandbox.stub(crypto, 'validateSig').resolves()
+    sandbox.stub(assert, 'isTypeOf').returns()
 
-    const db = {
-      register: async opts => {
+    const publisherDB = {
+      createChallenge: async opts => {
+        t.same(opts, { nonce: challenge, link, publisher: identity, key })
+      },
+      createPublisher: async opts => {
         // TODO: actually validate
         t.same(opts, { challenge, link, key: pick(key, ['pub', 'curve']) })
       }
     } as Publisher
 
-    const publisher = createPublisher({ db })
-    const key = { pub: 'ha', curve: 'blah', ho: 'hey' } as ECPubKey
+    const publisher = createPublisher({ publisherDB, models })
+    const key: ECPubKey = { pub: 'ha', curve: 'blah' }
     const identity = { pubkeys: [key], _t: 'tradle.Identity' } as Identity
 
     const {} = await publisher.register({ identity, key })

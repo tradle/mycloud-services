@@ -1,15 +1,18 @@
-import { DB as DBHandle } from '@tradle/dynamodb'
+import { DB as DBHandle, Models, Model } from '@tradle/dynamodb'
 // import { Level } from 'pino'
 import Compose from 'koa-compose'
 import Koa from 'koa'
+import Router from 'koa-router'
 import * as t from 'io-ts'
-import { Publisher } from './domain/publisher'
-import { Subscriber } from './domain/subscriber'
+import { Publisher } from './domain/push-notifications/publisher'
+import { Publisher as PublisherDB } from './db/push-notifications/publisher'
+import { Subscriber } from './domain/push-notifications/subscriber'
+import { Subscriber as SubscriberDB } from './db/push-notifications/subscriber'
 import { UserLogs } from './domain/user-logs'
 
-export { PushProtocol } from './constants'
+export { PushProtocol } from './domain/push-notifications/constants'
 
-export { DBHandle }
+export { DBHandle, Model, Models, PublisherDB, SubscriberDB }
 
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
 export type AsyncFn = (...args: any[]) => Promise<any | void>
@@ -18,7 +21,8 @@ export interface RequestContext extends Koa.Context {
   container: Container
 }
 
-export type Middleware = Koa.Middleware<Koa.ParameterizedContext<any, RequestContext>>
+// export type Middleware = Koa.Middleware<any, RequestContext>
+export type RouterMiddleware = Router.IMiddleware<any, RequestContext>
 
 const LogLevelV = t.union([
   t.literal('fatal'),
@@ -97,11 +101,14 @@ export interface LogStore {
 
 export interface Container {
   db: DBHandle
-  subscriber: Subscriber
+  publisherDB: PublisherDB
   publisher: Publisher
+  subscriberDB: SubscriberDB
+  subscriber: Subscriber
   userLogs: UserLogs
   config: Config
   logger: Logger
+  models: Models
   containerMiddleware: Compose.Middleware<Koa.Context>
 }
 

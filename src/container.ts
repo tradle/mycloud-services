@@ -1,18 +1,19 @@
 import AWS from 'aws-sdk'
-import { createHandle } from './db/handle'
-import { create as createSubscriber } from './domain/subscriber'
-import { create as createPublisher } from './domain/publisher'
+import { create as createSubscriber } from './domain/push-notifications/subscriber'
+import { create as createPublisher } from './domain/push-notifications/publisher'
 import { create as createUserLogs } from './domain/user-logs'
-import { create as createSubscriberDB } from './db/subscriber'
-import { create as createPublisherDB } from './db/publisher'
-import { createStore as createS3KeyValueStore } from './s3-kv'
+import { create as createSubscriberDB } from './db/push-notifications/subscriber'
+import { create as createPublisherDB } from './db/push-notifications/publisher'
+import { createStore as createS3KeyValueStore } from './infra/aws/s3-kv'
+import { createClient as createDBClient } from './infra/aws/db'
+import { getServiceOptions as getBaseServiceOptions } from './infra/aws/get-service-options'
 import { createStore as createLogStore } from './log-store'
-import { getServiceOptions as getBaseServiceOptions } from './get-service-options'
-import { createTableDefinition } from './table-definition'
+import { createTableDefinition } from './config/aws/table-definition'
 import { Config, Container } from './types'
 import { createLogger } from './logger'
 import { createConfig } from './config'
-import { create as createContainerMiddleware } from './interfaces/http/middleware/container'
+import { create as createContainerMiddleware } from './entrypoint/http/middleware/container'
+import models from './models'
 
 export const createContainer = (config: Config = createConfig()): Container => {
   const { local, region, s3UserLogPrefix, tableName, logLevel } = config
@@ -32,7 +33,8 @@ export const createContainer = (config: Config = createConfig()): Container => {
     TableName: config.tableName
   })
 
-  const dbHandle = createHandle({
+  const db = createDBClient({
+    models,
     dynamodb,
     docClient,
     tableDefinition,
@@ -40,30 +42,31 @@ export const createContainer = (config: Config = createConfig()): Container => {
   })
 
   const s3 = new AWS.S3(getServiceOptions('s3'))
-  const s3KVStore = createS3KeyValueStore({
+  const keyValueStore = createS3KeyValueStore({
     client: s3,
     prefix: config.s3UserLogPrefix
   })
 
-  const logStore = createLogStore(s3KVStore)
-  const publisher = createPublisher({
-    db: createPublisherDB({ db: dbHandle })
-  })
-
-  const subscriber = createSubscriber({
-    db: createSubscriberDB({ db: dbHandle })
-  })
-
-  const userLogs = createUserLogs({ store: logStore })
   const container: Container = {
-    db: dbHandle,
-    subscriber,
-    publisher,
-    userLogs,
+    db,
     config,
     logger,
+    models,
+    publisherDB: null,
+    subscriberDB: null,
+    subscriber: null,
+    publisher: null,
+    userLogs: null,
     containerMiddleware: null
   }
+
+  const logStore = createLogStore(keyValueStore)
+  container.userLogs = createUserLogs({ store: logStore })
+
+  container.publisherDB = createPublisherDB(container)
+  container.publisher = createPublisher(container)
+  container.subscriberDB = createSubscriberDB(container)
+  container.subscriber = createSubscriber(container)
 
   container.containerMiddleware = createContainerMiddleware(container)
   return container
