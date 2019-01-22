@@ -5,7 +5,7 @@ import nkeyEC from 'nkey-ecdsa'
 import { IdentityV, ECPubKeyV, ECPubKey, Models, PublisherDB } from '../../types'
 import * as Errors from '../../errors'
 import * as crypto from '../../crypto'
-import * as assert from '../../assert'
+import * as assert from '../../utils/assert'
 
 export interface PublisherOpts {
   publisherDB: PublisherDB

@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { LogStore } from '../../types'
-import * as assert from '../../assert'
+import * as assert from '../../utils/assert'
 
 interface UserLogsOpts {
   store: LogStore

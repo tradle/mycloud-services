@@ -1,5 +1,5 @@
 import pino from 'pino'
-import { Logger } from './types'
+import { Logger } from '../types'
 
 export const createLogger = (opts: pino.LoggerOptions) => {
   const logger: unknown = pino({

@@ -3,13 +3,13 @@ import './setup'
 import test from 'tape'
 import sinon from 'sinon'
 import pick from 'lodash/pick'
-import { loudAsync } from '../loud-async'
+import { loudAsync } from '../utils/loud-async'
 import { create as createPublisher } from '../domain/push-notifications/publisher'
 import { Identity, ECPubKey } from '../types'
 import * as crypto from '../crypto'
 import { Publisher } from '../db/push-notifications/publisher'
 import models from '../models'
-import * as assert from '../assert'
+import * as assert from '../utils/assert'
 
 // f u Prettier!
 test(

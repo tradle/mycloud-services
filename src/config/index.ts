@@ -7,7 +7,7 @@ require('dotenv').config({
 
 import withDefaults from 'lodash/defaults'
 import { Config, ConfigV, LogLevel } from '../types'
-import * as assert from '../assert'
+import * as assert from '../utils/assert'
 
 const defaults: Partial<Config> = {
   logLevel: 'info',
