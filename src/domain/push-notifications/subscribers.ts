@@ -1,10 +1,10 @@
 import tradle from '@tradle/protocol'
-import { SignedTradleObject, Identity, PushProtocol, SubscriberDB } from '../../types'
+import { SignedTradleObject, Identity, PushProtocol, SubscriberDB, GetSubcriptionOpts } from '../../types'
 import * as Errors from '../../errors'
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from './constants'
 
-export interface SubscriberOpts {
+export interface SubscribersOpts {
   subscriberDB: SubscriberDB
 }
 
@@ -29,7 +29,7 @@ export interface ClearBadgeOpts extends SignedTradleObject {
   subscriber: string
 }
 
-export class Subscriber {
+export class Subscribers {
   public static validateSubscriber = (subscriber: CreateSubscriberOpts) => {
     const { identity, token, protocol } = subscriber
     crypto.validateSig({ object: identity, identity })
@@ -46,12 +46,12 @@ export class Subscriber {
   }
 
   private db: SubscriberDB
-  constructor({ subscriberDB }: SubscriberOpts) {
+  constructor({ subscriberDB }: SubscribersOpts) {
     this.db = subscriberDB
   }
 
   public create = async (subscriber: CreateSubscriberOpts) => {
-    Subscriber.validateSubscriber(subscriber)
+    Subscribers.validateSubscriber(subscriber)
 
     const { identity, token, protocol } = subscriber
     const { link, permalink } = tradle.links({ object: identity })
@@ -70,6 +70,14 @@ export class Subscriber {
   public clearBadge = async (opts: ClearBadgeOpts) => {
     throw new Errors.NotImplemented('implement me!')
   }
+
+  public getSubscription = async (opts: GetSubcriptionOpts) => {
+    return await this.db.getSubscription(opts)
+  }
+
+  public updateSubscription = async (sub: any) => {
+    await this.db.updateSubscription(sub)
+  }
 }
 
-export const create = (ctx: SubscriberOpts) => new Subscriber(ctx)
+export const create = (ctx: SubscribersOpts) => new Subscribers(ctx)

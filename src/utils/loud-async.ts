@@ -1,4 +1,4 @@
-import { AsyncFn } from '@localtypes'
+import { AsyncFn } from '../types'
 
 export const loudAsync = (asyncFn: AsyncFn) => async (...args) => {
   try {

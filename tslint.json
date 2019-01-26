@@ -11,7 +11,8 @@
     "forin": false,
     "curly": false,
     "no-var-requires": false,
-    "max-classes-per-file": false
+    "max-classes-per-file": false,
+    "variable-name": false
   },
   "rulesDirectory": []
 }

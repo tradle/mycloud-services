@@ -14,8 +14,11 @@ provider:
   environment:
     TABLE_NAME: 'tdl-superawesome-ltd-dev-bucket-0'
     S3_USER_LOG_PREFIX: 'tdl-superawesome-ltd-dev-logs/userlogs'
+    S3_PATH_TO_PUSH_CONF: 'tdl-superawesome-ltd-dev-privconfbucket/conf/push-notifications.json'
     LOG_LEVEL: 'debug'
     AWS_REGION: ${self:provider.region}
+
+  iamRoleStatements:
 
 custom:
   region: 'us-east-1'
@@ -23,43 +26,48 @@ custom:
     port: 31013
 
 functions:
+  # createPublisher:
+  #   handler: lib/entrypoint/http/functions/root.handler
+  #   events:
+  #     - http:
+  #         method: post
+  #         path: publisher
+
   createPublisher:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/sns/functions/register-publisher.handler
     events:
-      - http:
-          method: post
-          path: publisher
+      - sns: register-publisher
 
   createSubscriber:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
           path: subscriber
 
   createSubscription:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
           path: subscription
 
   createNotification:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
           path: notification
 
   clearBadge:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
           path: clearbadge
 
   saveUserLog:
-    handler: lib/root-handler.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post

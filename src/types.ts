@@ -4,10 +4,10 @@ import Compose from 'koa-compose'
 import Koa from 'koa'
 import Router from 'koa-router'
 import * as t from 'io-ts'
-import { Publisher } from './domain/push-notifications/publisher'
-import { Publisher as PublisherDB } from './db/push-notifications/publisher'
-import { Subscriber } from './domain/push-notifications/subscriber'
-import { Subscriber as SubscriberDB } from './db/push-notifications/subscriber'
+import { Publishers, RegisterPublisherOpts } from './domain/push-notifications/publishers'
+import { Publisher as PublisherDB } from './db/push-notifications/publishers'
+import { Subscribers } from './domain/push-notifications/subscribers'
+import { Subscribers as SubscriberDB } from './db/push-notifications/subscribers'
 import { UserLogs } from './domain/user-logs'
 
 export { PushProtocol } from './domain/push-notifications/constants'
@@ -15,6 +15,11 @@ export { PushProtocol } from './domain/push-notifications/constants'
 export { DBHandle, Model, Models, PublisherDB, SubscriberDB }
 
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
+
+export interface SNSClients {
+  [region: string]: AWS.SNS
+}
+
 export type AsyncFn = (...args: any[]) => Promise<any | void>
 
 export interface RequestContext extends Koa.Context {
@@ -44,6 +49,8 @@ const CommonConfig = t.type({
   env: t.string,
   region: t.string,
   s3UserLogPrefix: t.string,
+  s3PushConfBucket: t.string,
+  s3PushConfKey: t.string,
   logLevel: LogLevelV,
   tableName: t.string
 })
@@ -54,7 +61,8 @@ const LocalOnlyConfig = t.type({
 
 const RemoteOnlyConfig = t.partial({
   region: t.string,
-  functionName: t.string
+  functionName: t.string,
+  accountId: t.string
 })
 
 export const ConfigV = t.intersection([CommonConfig, LocalOnlyConfig, RemoteOnlyConfig])
@@ -99,17 +107,53 @@ export interface LogStore {
   put: (key: string, value: string) => Promise<void>
 }
 
+export const PublishOptsV = t.type({
+  topic: t.string,
+  message: t.string
+})
+
+export type PublishOpts = t.TypeOf<typeof PublishOptsV>
+
+export const SubscribeOptsV = t.type({
+  topic: t.string,
+  target: t.string
+})
+
+export type SubscribeOpts = t.TypeOf<typeof SubscribeOptsV>
+
+export interface PubSub {
+  publish: (opts: PublishOpts) => Promise<void>
+  subscribe: (opts: SubscribeOpts) => Promise<void>
+  createTopic?: (topic: string) => Promise<void>
+}
+
+export interface PushNotifierNotifyOpts {
+  deviceTokens: string[]
+  badge?: number
+}
+
+type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<void>
+
+export interface PushNotifier {
+  notify: PushNotifierNotify
+}
+
 export interface Container {
   db: DBHandle
+  pubSub: PubSub
+  pushNotifier: PushNotifier
   publisherDB: PublisherDB
-  publisher: Publisher
+  publisher: Publishers
   subscriberDB: SubscriberDB
-  subscriber: Subscriber
+  subscriber: Subscribers
+  createPublisherTopicName: CreatePublisherTopicName
+  parsePublisherTopic: ParsePublisherTopic
   userLogs: UserLogs
   config: Config
   logger: Logger
   models: Models
   containerMiddleware: Compose.Middleware<Koa.Context>
+  ready: Promise<void>
 }
 
 export interface StringMap {
@@ -157,3 +201,56 @@ export const IdentityV = t.intersection([
 ])
 
 export type Identity = t.TypeOf<typeof IdentityV>
+
+// Subscribers
+
+export interface GetSubcriptionOpts {
+  publisher: string
+  subscriber: string
+}
+
+export interface Subscription extends UnsignedTradleObject {
+  publisher: string
+  subscriber: string
+  deviceTokens: string[]
+  seq: number
+}
+
+// Publishers
+
+export const RegisterPublisherOptsV = t.type({
+  permalink: t.string,
+  accountId: t.string,
+  region: t.string
+})
+
+export type RegisterPublisherOpts = t.TypeOf<typeof RegisterPublisherOptsV>
+
+export const ConfirmPublisherOptsV = t.type({
+  nonce: t.string,
+  salt: t.string,
+  sig: t.string
+})
+
+export type ConfirmPublisherOpts = t.TypeOf<typeof ConfirmPublisherOptsV>
+
+export const VerifyChallengeResponseOptsV = t.intersection([
+  ConfirmPublisherOptsV,
+  t.type({
+    key: ECPubKeyV
+  })
+])
+
+export type VerifyChallengeResponseOpts = t.TypeOf<typeof VerifyChallengeResponseOptsV>
+
+export const NotifyOptsV = t.type({
+  publisher: t.string,
+  subscriber: t.string,
+  seq: t.number
+})
+
+export type NotifyOpts = t.TypeOf<typeof NotifyOptsV>
+
+export type CreatePublisherTopicName = (opts: RegisterPublisherOpts) => string
+
+export type ParsePublisherTopic = (topic: string) => RegisterPublisherOpts

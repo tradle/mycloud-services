@@ -13,3 +13,7 @@ export class InvalidSignature extends UserError {
 export class NotImplemented extends Error {
   public type = 'NotImplemented'
 }
+
+export class Unsupported extends Error {
+  public type = 'Unsupported'
+}

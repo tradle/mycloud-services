@@ -4,10 +4,10 @@ import test from 'tape'
 import sinon from 'sinon'
 import pick from 'lodash/pick'
 import { loudAsync } from '../utils/loud-async'
-import { create as createPublisher } from '../domain/push-notifications/publisher'
+import { create as createPublisher } from '../domain/push-notifications/publishers'
 import { Identity, ECPubKey } from '../types'
 import * as crypto from '../crypto'
-import { Publisher } from '../db/push-notifications/publisher'
+import { Publisher } from '../db/push-notifications/publishers'
 import models from '../models'
 import * as assert from '../utils/assert'
 
@@ -34,11 +34,17 @@ test(
       }
     } as Publisher
 
-    const publisher = createPublisher({ publisherDB, models })
+    const publisher = createPublisher({
+      publisherDB,
+      models,
+      createPublisherTopicName: null,
+      pubSub: null
+    })
+
     const key: ECPubKey = { pub: 'ha', curve: 'blah' }
     const identity = { pubkeys: [key], _t: 'tradle.Identity' } as Identity
 
-    const {} = await publisher.register({ identity, key })
+    await publisher.register({ accountId: 'a', region: 'b', permalink: 'c' })
     sandbox.restore()
 
     t.end()

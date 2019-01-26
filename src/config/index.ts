@@ -16,6 +16,14 @@ const defaults: Partial<Config> = {
 
 export const validateConfig = (config: Config) => assert.isTypeOf(config, ConfigV)
 export const createConfig = (env = process.env) => {
+  let s3PushConfBucket
+  let s3PushConfKey
+  if (env.S3_PATH_TO_PUSH_CONF) {
+    const idx = env.S3_PATH_TO_PUSH_CONF.indexOf('/')
+    s3PushConfBucket = env.S3_PATH_TO_PUSH_CONF.slice(0, idx)
+    s3PushConfKey = env.S3_PATH_TO_PUSH_CONF.slice(idx + 1)
+  }
+
   const { NODE_ENV = 'development' } = env
   const config = withDefaults(
     {
@@ -27,10 +35,13 @@ export const createConfig = (env = process.env) => {
       test: NODE_ENV === 'test',
       tableName: env.TABLE_NAME,
       s3UserLogPrefix: env.S3_USER_LOG_PREFIX,
+      s3PushConfBucket,
+      s3PushConfKey,
       logLevel: env.LOG_LEVEL as LogLevel,
       region: env.AWS_REGION,
-      functionName: env.AWS_LAMBDA_FUNCTION_NAME
-    },
+      functionName: env.AWS_LAMBDA_FUNCTION_NAME,
+      accountId: env.AWS_LAMBDA_FUNCTION_NAME && env.AWS_LAMBDA_FUNCTION_NAME.split(':')[4]
+    } as Config,
     defaults
   ) as Config
 
