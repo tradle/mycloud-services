@@ -11,12 +11,13 @@
     "outDir": "lib",
     "baseUrl": ".",
     "paths": {
+      // "*": ["node_modules/*"]
       // "@localtypes": ["src/types.ts"]
       //   "@errors": ["src/errors.ts"],
       //   "@assert": ["src/assert.ts"]
     }
   },
-  "types": ["node", "aws-sdk", "pino", "tape", "sinon", "lodash", "@tradle/dynamodb"],
+  "types": ["node", "aws-sdk", "pino", "tape", "sinon", "lodash", "@tradle/dynamodb", "@tradle/aws-utils"],
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules"],
   "compileOnSave": true

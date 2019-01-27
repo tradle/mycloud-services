@@ -121,10 +121,18 @@ export const SubscribeOptsV = t.type({
 
 export type SubscribeOpts = t.TypeOf<typeof SubscribeOptsV>
 
+export const AllowPublishOptsV = t.type({
+  topic: t.string,
+  publisherId: t.string
+})
+
+export type AllowPublishOpts = t.TypeOf<typeof AllowPublishOptsV>
+
 export interface PubSub {
   publish: (opts: PublishOpts) => Promise<void>
   subscribe: (opts: SubscribeOpts) => Promise<void>
   createTopic?: (topic: string) => Promise<void>
+  allowPublish?: (opts: AllowPublishOpts) => Promise<void>
 }
 
 export interface PushNotifierNotifyOpts {

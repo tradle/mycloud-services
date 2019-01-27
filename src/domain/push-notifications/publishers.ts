@@ -25,6 +25,7 @@ export interface PublishersOpts {
   models: Models
   createPublisherTopicName: CreatePublisherTopicName
   pushNotifier: PushNotifier
+  notificationsTarget: string
 }
 
 // export const verifyChallengeResponse = async (opts: VerifyChallengeResponseOpts) => {
@@ -43,12 +44,25 @@ export class Publishers {
   constructor(private opts: PublishersOpts) {}
   public register = async (opts: RegisterPublisherOpts) => {
     assert.isTypeOf(opts, RegisterPublisherOptsV)
-    const { pubSub, createPublisherTopicName } = this.opts
-    if (!pubSub.createTopic) {
-      throw new Errors.Unsupported(`local pubSub doesn't support 'createTopic'`)
+
+    const { pubSub, createPublisherTopicName, notificationsTarget } = this.opts
+    const topic = createPublisherTopicName(opts)
+    if (pubSub.createTopic) {
+      await pubSub.createTopic(topic)
     }
 
-    await pubSub.createTopic(createPublisherTopicName(opts))
+    if (pubSub.allowPublish) {
+      await pubSub.allowPublish({ topic, publisherId: opts.accountId })
+    }
+
+    await pubSub.subscribe({
+      topic,
+      target: notificationsTarget
+    })
+  }
+
+  public isRegistered = async (opts: RegisterPublisherOpts) => {
+    await this.opts.publisherDB.createPublisher
   }
 
   public notify = async (opts: NotifyOpts) => {

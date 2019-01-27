@@ -1,62 +1,28 @@
-import AWS from 'aws-sdk'
+import { SNS } from '@tradle/aws-utils'
 import { PubSub, PublishOpts, SubscribeOpts, SNSClients } from '../../../types'
 
-type DeliveryProtocol = 'http' | 'https' | 'email' | 'email-json' | 'lambda' | 'sms' | 'sqs' | 'application'
-
-export const parseTargetProtocol = (target: string): DeliveryProtocol => {
-  if (target.startsWith('arn:aws')) {
-    return target.split(':')[2] as DeliveryProtocol
-  }
-
-  if (target.startsWith('http://')) return 'http'
-  if (target.startsWith('https://')) return 'https'
-
-  if (/^\d+$/.test(target)) return 'sms'
-
-  return 'application'
-}
-
-export const parseTopicRegion = (topic: string): string => topic.split(':')[3]
-
 interface SNSPubSubOpts {
-  regionalClients: SNSClients
+  client: SNS.Client
 }
 
 export class SNSPubSub implements PubSub {
-  private byRegion: SNSClients
-  private snsOpts: AWS.SNS.Types.ClientConfiguration
-  constructor({ regionalClients }: SNSPubSubOpts) {
-    this.byRegion = regionalClients
+  private client: SNS.Client
+  constructor({ client }: SNSPubSubOpts) {
+    this.client = client
   }
 
-  public publish = async ({ message, topic }: PublishOpts) => {
+  public publish = async ({ message, topic }: PublishOpts) => this.client.publish({ message, topic })
+  public subscribe = async ({ topic, target }: SubscribeOpts) => this.client.subscribe({ topic, target })
+  public createTopic = (topic: string) => this.client.createTopic(topic)
+  public allowPublish = async ({ topic, publisherId }) => {
     const region = parseTopicRegion(topic)
-    const params: AWS.SNS.PublishInput = {
-      TopicArn: topic,
-      Message: message
-    }
-
-    await this.byRegion[region].publish(params).promise()
-  }
-
-  public subscribe = async ({ topic, target }: SubscribeOpts) => {
-    const protocol = parseTargetProtocol(target)
-    const region = parseTopicRegion(topic)
-    const params: AWS.SNS.SubscribeInput = {
-      TopicArn: topic,
-      Protocol: protocol
-    }
-
-    await this.byRegion[region].subscribe(params).promise()
-  }
-
-  public createTopic = async (topic: string) => {
-    const region = parseTopicRegion(topic)
-    const params: AWS.SNS.CreateTopicInput = {
-      Name: topic
-    }
-
-    await this.byRegion[region].createTopic(params).promise()
+    await this.byRegion[region]
+      .addPermission({
+        AWSAccountId: publisherId,
+        TopicArn: topic,
+        ActionName
+      })
+      .promise()
   }
 }
 
