@@ -1,7 +1,7 @@
 import pick from 'lodash/pick'
 import { SNSEvent } from 'aws-lambda'
 import * as Errors from '../../../errors'
-import { RegisterPublisherOpts } from '../../../domain/push-notifications/publishers'
+import { RegisterPublisherOpts } from '../../../types'
 
 export const parseEvent = (event: SNSEvent): RegisterPublisherOpts => {
   try {

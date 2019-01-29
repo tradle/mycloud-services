@@ -1,28 +1,27 @@
-import { SNS } from '@tradle/aws-utils'
-import { PubSub, PublishOpts, SubscribeOpts, SNSClients } from '../../../types'
+import { PubSub } from '../../../types'
+import { SNSClient } from '@tradle/aws-sns-client'
 
 interface SNSPubSubOpts {
-  client: SNS.Client
+  sns: SNSClient
 }
 
 export class SNSPubSub implements PubSub {
-  private client: SNS.Client
-  constructor({ client }: SNSPubSubOpts) {
-    this.client = client
+  private sns: SNSClient
+  constructor({ sns }: SNSPubSubOpts) {
+    this.sns = sns
   }
 
-  public publish = async ({ message, topic }: PublishOpts) => this.client.publish({ message, topic })
-  public subscribe = async ({ topic, target }: SubscribeOpts) => this.client.subscribe({ topic, target })
-  public createTopic = (topic: string) => this.client.createTopic(topic)
+  public get publish() {
+    return this.sns.publish.bind(this.sns)
+  }
+  public get subscribe() {
+    return this.sns.subscribeIfNotSubscribed.bind(this.sns)
+  }
+  public get createTopic() {
+    return this.sns.createTopic.bind(this.sns)
+  }
   public allowPublish = async ({ topic, publisherId }) => {
-    const region = parseTopicRegion(topic)
-    await this.byRegion[region]
-      .addPermission({
-        AWSAccountId: publisherId,
-        TopicArn: topic,
-        ActionName
-      })
-      .promise()
+    await this.sns.allowCrossAccountPublish(topic, [publisherId])
   }
 }
 

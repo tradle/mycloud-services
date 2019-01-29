@@ -4,7 +4,7 @@ import Compose from 'koa-compose'
 import Koa from 'koa'
 import Router from 'koa-router'
 import * as t from 'io-ts'
-import { Publishers, RegisterPublisherOpts } from './domain/push-notifications/publishers'
+import { Publishers } from './domain/push-notifications/publishers'
 import { Publisher as PublisherDB } from './db/push-notifications/publishers'
 import { Subscribers } from './domain/push-notifications/subscribers'
 import { Subscribers as SubscriberDB } from './db/push-notifications/subscribers'
@@ -40,7 +40,7 @@ const LogLevelV = t.union([
 
 export type LogLevel = t.TypeOf<typeof LogLevelV>
 
-const CommonConfig = t.type({
+const CommonConfig = t.strict({
   local: t.boolean,
   usingServerlessOffline: t.boolean,
   production: t.boolean,
@@ -55,13 +55,14 @@ const CommonConfig = t.type({
   tableName: t.string
 })
 
-const LocalOnlyConfig = t.type({
+const LocalOnlyConfig = t.strict({
   // port: t.number
 })
 
 const RemoteOnlyConfig = t.partial({
   region: t.string,
   functionName: t.string,
+  notifyFunctionName: t.string,
   accountId: t.string
 })
 
@@ -91,7 +92,7 @@ export interface Logger {
   log: (...args: any[]) => void
 }
 
-export const ECPubKeyV = t.type({
+export const ECPubKeyV = t.strict({
   pub: t.string,
   curve: t.string
 })
@@ -107,21 +108,21 @@ export interface LogStore {
   put: (key: string, value: string) => Promise<void>
 }
 
-export const PublishOptsV = t.type({
+export const PublishOptsV = t.strict({
   topic: t.string,
   message: t.string
 })
 
 export type PublishOpts = t.TypeOf<typeof PublishOptsV>
 
-export const SubscribeOptsV = t.type({
+export const SubscribeOptsV = t.strict({
   topic: t.string,
   target: t.string
 })
 
 export type SubscribeOpts = t.TypeOf<typeof SubscribeOptsV>
 
-export const AllowPublishOptsV = t.type({
+export const AllowPublishOptsV = t.strict({
   topic: t.string,
   publisherId: t.string
 })
@@ -138,6 +139,8 @@ export interface PubSub {
 export interface PushNotifierNotifyOpts {
   deviceTokens: string[]
   badge?: number
+  title?: string
+  body?: string
 }
 
 type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<void>
@@ -150,10 +153,11 @@ export interface Container {
   db: DBHandle
   pubSub: PubSub
   pushNotifier: PushNotifier
+  notificationsTarget: string
   publisherDB: PublisherDB
-  publisher: Publishers
+  publishers: Publishers
   subscriberDB: SubscriberDB
-  subscriber: Subscribers
+  subscribers: Subscribers
   createPublisherTopicName: CreatePublisherTopicName
   parsePublisherTopic: ParsePublisherTopic
   userLogs: UserLogs
@@ -175,7 +179,7 @@ export interface ParsedAPIGatewayEvent {
 }
 
 export const UnsignedTradleObjectV = t.intersection([
-  t.type({
+  t.strict({
     _t: t.string
   }),
   t.partial({
@@ -189,7 +193,7 @@ export type UnsignedTradleObject = t.TypeOf<typeof UnsignedTradleObjectV>
 
 export const SignedTradleObjectV = t.intersection([
   UnsignedTradleObjectV,
-  t.type({
+  t.strict({
     _s: t.string
   }),
   t.partial({
@@ -203,7 +207,7 @@ export type SignedTradleObject = t.TypeOf<typeof SignedTradleObjectV>
 
 export const IdentityV = t.intersection([
   SignedTradleObjectV,
-  t.type({
+  t.strict({
     pubkeys: t.array(ECPubKeyV)
   })
 ])
@@ -226,7 +230,7 @@ export interface Subscription extends UnsignedTradleObject {
 
 // Publishers
 
-export const RegisterPublisherOptsV = t.type({
+export const RegisterPublisherOptsV = t.strict({
   permalink: t.string,
   accountId: t.string,
   region: t.string
@@ -234,7 +238,7 @@ export const RegisterPublisherOptsV = t.type({
 
 export type RegisterPublisherOpts = t.TypeOf<typeof RegisterPublisherOptsV>
 
-export const ConfirmPublisherOptsV = t.type({
+export const ConfirmPublisherOptsV = t.strict({
   nonce: t.string,
   salt: t.string,
   sig: t.string
@@ -244,14 +248,14 @@ export type ConfirmPublisherOpts = t.TypeOf<typeof ConfirmPublisherOptsV>
 
 export const VerifyChallengeResponseOptsV = t.intersection([
   ConfirmPublisherOptsV,
-  t.type({
+  t.strict({
     key: ECPubKeyV
   })
 ])
 
 export type VerifyChallengeResponseOpts = t.TypeOf<typeof VerifyChallengeResponseOptsV>
 
-export const NotifyOptsV = t.type({
+export const NotifyOptsV = t.strict({
   publisher: t.string,
   subscriber: t.string,
   seq: t.number
@@ -262,3 +266,9 @@ export type NotifyOpts = t.TypeOf<typeof NotifyOptsV>
 export type CreatePublisherTopicName = (opts: RegisterPublisherOpts) => string
 
 export type ParsePublisherTopic = (topic: string) => RegisterPublisherOpts
+export const SubscriberV = t.strict({
+  permalink: t.string,
+  devices: t.array(t.string)
+})
+
+export type Subscriber = t.TypeOf<typeof SubscriberV>

@@ -1,6 +1,7 @@
 import omit from 'lodash/omit'
 import buildResource from '@tradle/build-resource'
-import { DBHandle, Identity, Models } from '../../types'
+import Errors from '@tradle/errors'
+import { DBHandle, Identity, Models, RegisterPublisherOpts } from '../../types'
 
 interface PublisherOpts {
   db: DBHandle
@@ -19,17 +20,12 @@ export interface CreateChallengeOpts {
   publisher: Identity
 }
 
-export interface CreatePublisherOpts {
-  link: string
-  key: ECPubKey
-}
+export interface CreatePublisherOpts extends RegisterPublisherOpts {}
+export interface GetPublisherOpts extends CreatePublisherOpts {}
+export interface ExistsPublisherOpts extends GetPublisherOpts {}
 
 const T_PUBLISHER_CHALLENGE = 'tradle.PNSPublisherChallenge'
 const T_PUBLISHER = 'tradle.PNSPublisher'
-
-const unserializeResource = resource => omit(resource, ['_t'])
-const unserializeChallenge = unserializeResource
-const serializePublisher = ({ key, link }: CreatePublisherOpts) => ({ _t: T_PUBLISHER, key, link })
 
 export class Publisher {
   private db: DBHandle
@@ -39,36 +35,20 @@ export class Publisher {
     this.models = models
   }
 
-  public createChallenge = async (opts: CreateChallengeOpts) => {
-    const serialized = this.serializeChallenge(opts)
-    await this.db.put(serialized)
-  }
-
-  public getChallenge = async (nonce: string) => {
-    const serialized = await this.db.get({
-      _t: T_PUBLISHER_CHALLENGE,
-      nonce
-    })
-
-    return unserializeChallenge(serialized)
-  }
-
   public createPublisher = async (opts: CreatePublisherOpts) => {
-    await this.db.put(serializePublisher(opts))
+    await this.db.put({ _t: T_PUBLISHER, ...opts })
   }
 
-  // doesn't really belong here
-  private serializeChallenge = ({ nonce, key, publisher }: CreateChallengeOpts) => {
-    const publisherStub = buildResource.stub({
-      models: this.models,
-      resource: publisher
-    })
-
-    return {
-      _t: T_PUBLISHER_CHALLENGE,
-      nonce,
-      key,
-      publisher: publisherStub
+  public getPublisher = async (opts: GetPublisherOpts) => {
+    return await this.db.findOne({ _t: T_PUBLISHER, ...opts })
+  }
+  public publisherExists = async (opts: GetPublisherOpts) => {
+    try {
+      await this.getPublisher(opts)
+      return false
+    } catch (err) {
+      Errors.ignore(err, Errors.NotFound)
+      return false
     }
   }
 }

@@ -21,6 +21,6 @@ export const parseEvent = ({ event, container }: ParseEventOpts): NotifyOpts => 
   return {
     seq: payload.seq,
     subscriber: payload.subscriber,
-    publisher: container.parsePublisherTopic(TopicArn).publisher
+    publisher: container.parsePublisherTopic(TopicArn).permalink
   }
 }

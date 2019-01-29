@@ -7,18 +7,20 @@ const pickNonNull = <T>(obj: T): T => pickBy(obj as any, val => val != null) as 
 
 interface PusherOpts {
   production: boolean
-  gcm: {
+  gcm?: {
     apiKey: string
   }
-  apn: {
+  apn?: {
     cert: string
     key: string
+    appId: string
   }
 }
 
 export class Pusher implements PushNotifier {
   private _send: (regIds: string[], data: PN.Data) => Promise<void>
-  constructor(opts: PusherOpts) {
+
+  constructor(private opts: PusherOpts) {
     const { apn, gcm, production } = opts
     const client = new PN({
       gcm: {
@@ -42,17 +44,22 @@ export class Pusher implements PushNotifier {
     this._send = promisify(client.send.bind(client))
   }
 
-  public notify = async ({ deviceTokens, badge }: PushNotifierNotifyOpts) => {
-    const data: PN.Data = pickNonNull({
-      title: 'You have unread messages',
-      body: '',
+  // public ping = async (opts: PushNotifierPingOpts) => this.notify({ ...opts, title: '', body: '' })
+
+  public notify = async (opts: PushNotifierNotifyOpts) => {
+    const data: PN.Data = this.createPushData(opts)
+    await this._send(opts.deviceTokens, data)
+  }
+
+  private createPushData = ({ title = '', body = '', deviceTokens, badge }: PushNotifierNotifyOpts) => {
+    return pickNonNull({
+      title,
+      body,
       contentAvailable: true,
       // iOS
-      topic: 'io.tradle.dev.tim',
+      topic: this.opts.apn.appId,
       badge
     })
-
-    await this._send(deviceTokens, data)
   }
 }
 

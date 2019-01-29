@@ -45,24 +45,30 @@ export class Publishers {
   public register = async (opts: RegisterPublisherOpts) => {
     assert.isTypeOf(opts, RegisterPublisherOptsV)
 
-    const { pubSub, createPublisherTopicName, notificationsTarget } = this.opts
+    const { pubSub, createPublisherTopicName, notificationsTarget, publisherDB } = this.opts
     const topic = createPublisherTopicName(opts)
     if (pubSub.createTopic) {
       await pubSub.createTopic(topic)
     }
 
+    const tasks = []
     if (pubSub.allowPublish) {
-      await pubSub.allowPublish({ topic, publisherId: opts.accountId })
+      const allowPublish = pubSub.allowPublish({ topic, publisherId: opts.accountId })
+      tasks.push(allowPublish)
     }
 
-    await pubSub.subscribe({
+    const subscribe = pubSub.subscribe({
       topic,
       target: notificationsTarget
     })
+
+    const createPublisher = publisherDB.createPublisher(opts)
+    tasks.push(subscribe, createPublisher)
+    await Promise.all(tasks)
   }
 
   public isRegistered = async (opts: RegisterPublisherOpts) => {
-    await this.opts.publisherDB.createPublisher
+    await this.opts.publisherDB.publisherExists(opts)
   }
 
   public notify = async (opts: NotifyOpts) => {

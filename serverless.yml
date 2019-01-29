@@ -17,6 +17,8 @@ provider:
     S3_PATH_TO_PUSH_CONF: 'tdl-superawesome-ltd-dev-privconfbucket/conf/push-notifications.json'
     LOG_LEVEL: 'debug'
     AWS_REGION: ${self:provider.region}
+    NOTIFY_LAMBDA_FUNCTION:
+      Ref: NotifyLambdaFunction
 
   iamRoleStatements:
 
@@ -52,7 +54,7 @@ functions:
           method: post
           path: subscription
 
-  createNotification:
+  notify:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:

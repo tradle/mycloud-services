@@ -1,6 +1,6 @@
 import tradle from '@tradle/protocol'
-import { SignedTradleObject, Identity, PushProtocol, SubscriberDB, GetSubcriptionOpts } from '../../types'
-import * as Errors from '../../errors'
+import Errors from '@tradle/errors'
+import { SignedTradleObject, Identity, PushProtocol, SubscriberDB, GetSubcriptionOpts, Subscriber } from '../../types'
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from './constants'
 
@@ -27,6 +27,20 @@ export interface CreateSubscriptionOpts extends SignedTradleObject {
 
 export interface ClearBadgeOpts extends SignedTradleObject {
   subscriber: string
+}
+
+export interface Device {
+  token: string
+  protocol: string
+}
+
+export const serializeDevice = ({ token, protocol }: Device) => `${protocol}:${token}`
+export const unserializeDevice = (serialized: string) => {
+  const idx = serialized.indexOf(':')
+  return {
+    protocol: serialized.slice(0, idx),
+    token: serialized.slice(idx + 1)
+  }
 }
 
 export class Subscribers {
@@ -56,15 +70,42 @@ export class Subscribers {
     const { identity, token, protocol } = subscriber
     const { link, permalink } = tradle.links({ object: identity })
     // add device token for subscriber permalink
-    await this.db.addDevice({ subscriber: permalink, token, protocol })
+    await this.addSubscriberDevice({ subscriber: permalink, token, protocol })
   }
 
+  /**
+   * Add the given device to the subscriber
+   * Create the subscriber if it doesn't exist
+   */
   public addSubscriberDevice = async ({ subscriber, token, protocol }: AddTokenOpts) => {
-    throw new Errors.NotImplemented('implement me!')
+    let sub: Subscriber
+    try {
+      sub = await this.db.getSubscriber({ subscriber })
+    } catch (err) {
+      Errors.ignore(err, Errors.NotFound)
+      sub = {
+        permalink: subscriber,
+        devices: []
+      }
+    }
+
+    if (!sub.devices) sub.devices = []
+
+    const { devices } = sub
+    const device = serializeDevice({ token, protocol })
+    if (devices.includes(device)) {
+      devices.push(device)
+    }
+
+    await this.db.updateSubscriber(sub)
   }
 
   public createSubscription = async (subscription: CreateSubscriptionOpts) => {
-    throw new Errors.NotImplemented('implement me!')
+    const { subscriber } = subscription
+    const sub = await this.db.getSubscriber({ subscriber })
+    // const subsBloom = sub.subs
+    // addToBloomFilter({ bloom: subsBloom, item: subsBloom })
+    await this.db.updateSubscriber(sub)
   }
 
   public clearBadge = async (opts: ClearBadgeOpts) => {

@@ -40,7 +40,8 @@ export const createConfig = (env = process.env) => {
       logLevel: env.LOG_LEVEL as LogLevel,
       region: env.AWS_REGION,
       functionName: env.AWS_LAMBDA_FUNCTION_NAME,
-      accountId: env.AWS_LAMBDA_FUNCTION_NAME && env.AWS_LAMBDA_FUNCTION_NAME.split(':')[4]
+      accountId: env.AWS_LAMBDA_FUNCTION_NAME && env.AWS_LAMBDA_FUNCTION_NAME.split(':')[4],
+      notifyFunctionName: env.NOTIFY_LAMBDA_FUNCTION
     } as Config,
     defaults
   ) as Config
