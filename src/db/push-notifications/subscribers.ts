@@ -1,17 +1,11 @@
 import { DBHandle, GetSubcriptionOpts, Subscription, Identity, Subscriber } from '../../types'
-import * as Errors from '../../errors'
+import { TYPES } from '../../constants'
 
 export interface SubscribersOpts {
   db: DBHandle
 }
 
-const TYPES = {
-  DEVICE: 'tradle.services.PNSRegistration',
-  SUBSCRIBER: 'tradle.services.PNSSubscriber',
-  SUBSCRIPTION: 'tradle.services.PNSSubscription'
-}
-
-export interface CreateSubscriberOpts {}
+// export interface CreateSubscriberOpts {}
 export interface CreateSubscriptionOpts {}
 export interface AddDeviceOpts {}
 export interface GetSubscriberOpts {
@@ -24,30 +18,30 @@ export class Subscribers {
     this.db = ctx.db
   }
 
-  public createSubscriber = async (opts: CreateSubscriberOpts) => this.put(TYPES.SUBSCRIBER, opts)
+  // public createSubscriber = async (opts: CreateSubscriberOpts) => this.put(TYPES.SUBSCRIBER, opts)
 
   public createSubscription = async (opts: CreateSubscriptionOpts) => this.put(TYPES.SUBSCRIPTION, opts)
 
   public getSubscriber = async ({ subscriber }: GetSubscriberOpts) =>
-    this.matchOne(TYPES.SUBSCRIBER, { subscriber }) as Promise<Subscriber>
+    this.db.matchOne(TYPES.SUBSCRIBER, { subscriber }) as Promise<Subscriber>
   public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
-    this.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
+    this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
 
-  public updateSubscriber = (sub: Subscriber) => this.put(TYPES.SUBSCRIBER, sub)
+  public updateSubscriber = (sub: Subscriber) => this.update(TYPES.SUBSCRIBER, sub)
+  // use put() because subscription is signed
   public updateSubscription = (sub: Subscription) => this.put(TYPES.SUBSCRIPTION, sub)
+  public incSubscriberUnreadCount = async (permalink: string) => {
+    const subscriber = await this.db.matchOne(TYPES.SUBSCRIBER, { permalink })
+    const unreadCount = (subscriber.unreadCount || 0) + 1
+    await this.update(TYPES.SUBSCRIBER, { subscriber, unreadCount })
+  }
 
   private put = async (type: string, resource: any): Promise<void> => {
     await this.db.put({ _t: type, ...resource })
   }
-  private matchOne = async (type: string, props: any) => {
-    return await this.db.findOne({
-      filter: {
-        EQ: {
-          _t: type,
-          ...props
-        }
-      }
-    })
+
+  private update = async (type: string, resource: any): Promise<void> => {
+    await this.db.update({ _t: type, ...resource })
   }
 }
 

@@ -1,25 +1,19 @@
-// import { promisify } from 'util'
-// import * as t from 'io-ts'
-// import nkeyEC from 'nkey-ecdsa'
 import {
   Models,
-  PublisherDB,
+  PublishersDB,
   PubSub,
   CreatePublisherTopicName,
-  VerifyChallengeResponseOpts,
   RegisterPublisherOpts,
   RegisterPublisherOptsV,
   NotifyOpts,
   NotifyOptsV,
   PushNotifier
 } from '../../types'
-import * as Errors from '../../errors'
-// import * as crypto from '../../crypto'
 import * as assert from '../../utils/assert'
 import { Subscribers } from './subscribers'
 
 export interface PublishersOpts {
-  publisherDB: PublisherDB
+  publishersDB: PublishersDB
   subscribers: Subscribers
   pubSub: PubSub
   models: Models
@@ -40,12 +34,19 @@ export interface PublishersOpts {
 
 // export const genChallengeForPublisher = () => crypto.genNonce(32, 'base64')
 
+export const createPushMessage = (name: string) => `You have unread messages from "${name}"`
+
+// for now, always show one, later we'll count
+const BADGES = {
+  ONE: 1
+}
+
 export class Publishers {
   constructor(private opts: PublishersOpts) {}
   public register = async (opts: RegisterPublisherOpts) => {
     assert.isTypeOf(opts, RegisterPublisherOptsV)
 
-    const { pubSub, createPublisherTopicName, notificationsTarget, publisherDB } = this.opts
+    const { pubSub, createPublisherTopicName, notificationsTarget } = this.opts
     const topic = createPublisherTopicName(opts)
     if (pubSub.createTopic) {
       await pubSub.createTopic(topic)
@@ -62,25 +63,39 @@ export class Publishers {
       target: notificationsTarget
     })
 
-    const createPublisher = publisherDB.createPublisher(opts)
-    tasks.push(subscribe, createPublisher)
+    tasks.push(subscribe)
     await Promise.all(tasks)
   }
 
-  public isRegistered = async (opts: RegisterPublisherOpts) => {
-    await this.opts.publisherDB.publisherExists(opts)
-  }
+  // public isRegistered = async (opts: RegisterPublisherOpts) => {
+  //   return await this.opts.publishersDB.publisherExists(opts)
+  // }
 
   public notify = async (opts: NotifyOpts) => {
     assert.isTypeOf(opts, NotifyOptsV)
-    const { subscribers, pushNotifier } = this.opts
+    const { publishersDB, subscribers, pushNotifier } = this.opts
     const { publisher, subscriber } = opts
-    const subscription = await subscribers.getSubscription({ subscriber, publisher })
-    const { deviceTokens, seq } = subscription
-    subscription.seq++
-    await pushNotifier.notify({ deviceTokens, badge: seq })
-    await subscribers.updateSubscription(subscription)
+    const [subscription, publisherName] = await Promise.all([
+      subscribers.getSubscription({ subscriber, publisher }),
+      publishersDB.getPublisherName(publisher)
+    ])
+
+    const { deviceTokens } = subscription
+    const title = createPushMessage(publisherName)
+    await pushNotifier.notify({ deviceTokens, title, badge: BADGES.ONE })
+    const updateSubscription = subscribers.updateSubscription({
+      ...subscription,
+      seq: (subscription.seq || 0) + 1
+    })
+
+    const updateSubscriber = subscribers.incSubscriberUnreadCount(subscriber)
+    await Promise.all([updateSubscription, updateSubscriber])
   }
+
+  // private hasPublisherTopic = async (opts: RegisterPublisherOpts) => {
+  //   const { pubSub, createPublisherTopicName } = this.opts
+  //   return await pubSub.hasTopic(createPublisherTopicName(opts))
+  // }
 }
 
 export const create = (ctx: PublishersOpts) => new Publishers(ctx)

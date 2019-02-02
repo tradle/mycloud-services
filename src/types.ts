@@ -5,14 +5,12 @@ import Koa from 'koa'
 import Router from 'koa-router'
 import * as t from 'io-ts'
 import { Publishers } from './domain/push-notifications/publishers'
-import { Publisher as PublisherDB } from './db/push-notifications/publishers'
+import { Publishers as PublishersDB } from './db/push-notifications/publishers'
 import { Subscribers } from './domain/push-notifications/subscribers'
-import { Subscribers as SubscriberDB } from './db/push-notifications/subscribers'
+import { Subscribers as SubscribersDB } from './db/push-notifications/subscribers'
 import { UserLogs } from './domain/user-logs'
-
-export { PushProtocol } from './domain/push-notifications/constants'
-
-export { DBHandle, Model, Models, PublisherDB, SubscriberDB }
+export { PushProtocol } from './constants'
+export { DBHandle, Model, Models, PublishersDB, SubscribersDB }
 
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
 
@@ -40,7 +38,7 @@ const LogLevelV = t.union([
 
 export type LogLevel = t.TypeOf<typeof LogLevelV>
 
-const CommonConfig = t.strict({
+const CommonConfig = t.type({
   local: t.boolean,
   usingServerlessOffline: t.boolean,
   production: t.boolean,
@@ -48,14 +46,14 @@ const CommonConfig = t.strict({
   test: t.boolean,
   env: t.string,
   region: t.string,
-  s3UserLogPrefix: t.string,
+  s3UserLogsPrefix: t.string,
   s3PushConfBucket: t.string,
   s3PushConfKey: t.string,
   logLevel: LogLevelV,
-  tableName: t.string
+  myCloudTableName: t.string
 })
 
-const LocalOnlyConfig = t.strict({
+const LocalOnlyConfig = t.type({
   // port: t.number
 })
 
@@ -73,7 +71,7 @@ export type Config = t.TypeOf<typeof ConfigV>
 //   local: boolean
 //   tableName: string
 //   // bucket/path/to/userlogs
-//   s3UserLogPrefix: string
+//   s3UserLogsPrefix: string
 //   logLevel: Level | 'silly'
 //   region: string
 //   functionName: string
@@ -91,6 +89,12 @@ export interface Logger {
   silly: (...args: any[]) => void
   log: (...args: any[]) => void
 }
+
+export const IdentityPubKeyV = t.type({
+  type: t.string,
+  pub: t.string,
+  fingerprint: t.string
+})
 
 export const ECPubKeyV = t.strict({
   pub: t.string,
@@ -133,6 +137,7 @@ export interface PubSub {
   publish: (opts: PublishOpts) => Promise<void>
   subscribe: (opts: SubscribeOpts) => Promise<void>
   createTopic?: (topic: string) => Promise<void>
+  hasTopic?: (topic: string) => Promise<boolean>
   allowPublish?: (opts: AllowPublishOpts) => Promise<void>
 }
 
@@ -143,7 +148,7 @@ export interface PushNotifierNotifyOpts {
   body?: string
 }
 
-type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<void>
+type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<any>
 
 export interface PushNotifier {
   notify: PushNotifierNotify
@@ -154,12 +159,12 @@ export interface Container {
   pubSub: PubSub
   pushNotifier: PushNotifier
   notificationsTarget: string
-  publisherDB: PublisherDB
+  publishersDB: PublishersDB
   publishers: Publishers
-  subscriberDB: SubscriberDB
+  subscribersDB: SubscribersDB
   subscribers: Subscribers
   createPublisherTopicName: CreatePublisherTopicName
-  parsePublisherTopic: ParsePublisherTopic
+  parsePublisherTopicArn: ParsePublisherTopic
   userLogs: UserLogs
   config: Config
   logger: Logger
@@ -208,7 +213,7 @@ export type SignedTradleObject = t.TypeOf<typeof SignedTradleObjectV>
 export const IdentityV = t.intersection([
   SignedTradleObjectV,
   t.strict({
-    pubkeys: t.array(ECPubKeyV)
+    pubkeys: t.array(IdentityPubKeyV)
   })
 ])
 
@@ -255,11 +260,15 @@ export const VerifyChallengeResponseOptsV = t.intersection([
 
 export type VerifyChallengeResponseOpts = t.TypeOf<typeof VerifyChallengeResponseOptsV>
 
-export const NotifyOptsV = t.strict({
-  publisher: t.string,
-  subscriber: t.string,
-  seq: t.number
-})
+export const NotifyOptsV = t.intersection([
+  t.strict({
+    publisher: t.string,
+    subscriber: t.string
+  }),
+  t.partial({
+    seq: t.number
+  })
+])
 
 export type NotifyOpts = t.TypeOf<typeof NotifyOptsV>
 
@@ -272,3 +281,21 @@ export const SubscriberV = t.strict({
 })
 
 export type Subscriber = t.TypeOf<typeof SubscriberV>
+
+// Push Notifier
+
+export const APNV = t.type({
+  cert: t.string,
+  key: t.string,
+  appId: t.string
+})
+export const GCMV = t.type({
+  apiKey: t.string
+})
+export const PusherOptsV = t.partial({
+  production: t.boolean,
+  gcm: GCMV,
+  apn: APNV
+})
+
+export type PusherOpts = t.TypeOf<typeof PusherOptsV>

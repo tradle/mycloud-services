@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "tape lib/test/*.js",
-    "tswatch": "tsc -w"
+    "tswatch": "tsc -w",
+    "debug": "cross-env SLS_DEBUG=* node --inspect ./node_modules/.bin/sls offline start",
+    "debug-brk": "cross-env SLS_DEBUG=* node --inspect-brk ./node_modules/.bin/sls offline start"
   },
   "dependencies": {
     "@tradle/build-resource": "~4.0.2",
@@ -19,6 +21,7 @@
     "@tradle/validate-resource": "~4.3.0",
     "@types/aws-sdk": "~2.7.0",
     "@types/lodash": "~4.14.120",
+    "apn": "github:tradle/node-apn",
     "dotenv": "~6.2.0",
     "http-status": "~1.3.1",
     "io-ts": "~1.6.4",
@@ -52,8 +55,10 @@
     "@types/tape": "~4.2.33",
     "@types/webpack": "^4.4.23",
     "blue-tape": "~1.0.0",
+    "cross-env": "~5.2.0",
     "prettier": "~1.15.3",
     "serverless-offline": "~4.1.4",
+    "serverless-pseudo-parameters": "~2.4.0",
     "sinon": "~7.2.3",
     "source-map-support": "~0.5.10",
     "tape": "~4.9.2",

@@ -1,5 +1,36 @@
 # tradle-services
 
+## Setup:
+
+### Clone and Install
+
+```sh
+git clone https://github.com/tradle/mycloud-services
+cd mycloud-services
+npm install
+```
+
+Create two env files (`.env` and `.env.offline`) in this project's root folder with the following variables (adapt to your resource names):
+
+For example:
+
+```sh
+# .env
+S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs-12345/userlogs
+S3_PUSH_CONF_PATH=tdl-tradle-ltd-dev-privateconf-12345/services/pns.json
+MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
+```
+
+```sh
+# .env.offline
+S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs/userlogs
+S3_PUSH_CONF_PATH=tdl-tradle-ltd-dev-privateconf/services/pns.json
+MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
+```
+
+`.env` should reference resources in AWS
+`.env.offline` should reference resources in [localstack](https://github.com/localstack/localstack). If you have a MyCloud development environment set up, you should have the relevant S3 buckets and DynamoDB table there
+
 ## Folder Structure
 
 Roughly approximates the "Clean Architecture" by "Uncle Bob"

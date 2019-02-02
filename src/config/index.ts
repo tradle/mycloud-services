@@ -1,11 +1,16 @@
+require('../../source-map-install')
+
 import path from 'path'
 
-require('../source-map-install')
-require('dotenv').config({
-  path: path.resolve(__dirname, '../.env')
-})
+const ENV_SUFFIX = process.env.SERVERLESS_OFFLINE ? '.offline' : ''
+const ENV_PATH = path.resolve(__dirname, `../../.env${ENV_SUFFIX}`)
+
+const ENV = require('dotenv').config({
+  path: ENV_PATH
+}).parsed
 
 import withDefaults from 'lodash/defaults'
+import { parseS3Path } from '@tradle/aws-common-utils'
 import { Config, ConfigV, LogLevel } from '../types'
 import * as assert from '../utils/assert'
 
@@ -15,26 +20,32 @@ const defaults: Partial<Config> = {
 }
 
 export const validateConfig = (config: Config) => assert.isTypeOf(config, ConfigV)
-export const createConfig = (env = process.env) => {
-  let s3PushConfBucket
-  let s3PushConfKey
-  if (env.S3_PATH_TO_PUSH_CONF) {
-    const idx = env.S3_PATH_TO_PUSH_CONF.indexOf('/')
-    s3PushConfBucket = env.S3_PATH_TO_PUSH_CONF.slice(0, idx)
-    s3PushConfKey = env.S3_PATH_TO_PUSH_CONF.slice(idx + 1)
+export const createConfig = (env: any) => {
+  const usingServerlessOffline = !!env.SERVERLESS_OFFLINE
+  const local = !!(usingServerlessOffline || env.IS_LOCAL)
+  if (local) {
+    env = {
+      ...env,
+      NOTIFY_LAMBDA_FUNCTION: 'mycloud-services-offline-notify-lambda',
+      // otherwise we get Ref objects from serverless.yml
+      ...ENV
+    }
   }
 
+  const { bucket, key } = parseS3Path(env.S3_PUSH_CONF_PATH)
+  const s3PushConfBucket = bucket
+  const s3PushConfKey = key
   const { NODE_ENV = 'development' } = env
   const config = withDefaults(
     {
-      local: !env.AWS_REGION,
-      usingServerlessOffline: !!env.SERVERLESS_OFFLINE,
+      local,
+      usingServerlessOffline,
       env: NODE_ENV,
       production: NODE_ENV === 'production',
       development: NODE_ENV === 'development',
       test: NODE_ENV === 'test',
-      tableName: env.TABLE_NAME,
-      s3UserLogPrefix: env.S3_USER_LOG_PREFIX,
+      myCloudTableName: env.MY_CLOUD_TABLE_NAME,
+      s3UserLogsPrefix: env.S3_USER_LOGS_PREFIX,
       s3PushConfBucket,
       s3PushConfKey,
       logLevel: env.LOG_LEVEL as LogLevel,
@@ -50,4 +61,18 @@ export const createConfig = (env = process.env) => {
   return config
 }
 
-createConfig()
+export const createConfigFromEnv = () => createConfig(process.env)
+
+// export const local = (env=process.env) => ({
+//   s3PushConfPath: 'tdl-tradle-ltd-dev-privateconf/services/pns.json',
+//   s3UserLogPrefix: 'tdl-tradle-ltd-dev-logs/userlogs',
+//   mycloudTableArn: 'aws:arn:dynamodb:us-east-1:1234512345:table/tdl-tradle-ltd-dev-bucket-0'
+// })
+
+// export const remote = () => ({
+//   s3PushConfPath: 'tdl-tradle-ltd-dev-privateconf/services/pns.json',
+//   s3UserLogPrefix: 'tdl-tradle-ltd-dev-logs/userlogs',
+//   mycloudTableArn: 'aws:arn:dynamodb:us-east-1:1234512345:table/tdl-tradle-ltd-dev-bucket-0'
+// })
+
+// export const getVars = () => (process.env.SERVERLESS_OFFLINE ? local() : remote())

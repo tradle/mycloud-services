@@ -5,7 +5,6 @@ import { DBHandle, Identity, Models, RegisterPublisherOpts } from '../../types'
 
 interface PublisherOpts {
   db: DBHandle
-  models: Models
 }
 
 interface ECPubKey {
@@ -24,33 +23,44 @@ export interface CreatePublisherOpts extends RegisterPublisherOpts {}
 export interface GetPublisherOpts extends CreatePublisherOpts {}
 export interface ExistsPublisherOpts extends GetPublisherOpts {}
 
-const T_PUBLISHER_CHALLENGE = 'tradle.PNSPublisherChallenge'
-const T_PUBLISHER = 'tradle.PNSPublisher'
-
-export class Publisher {
-  private db: DBHandle
-  private models: Models
-  constructor({ db, models }: PublisherOpts) {
-    this.db = db
-    this.models = models
-  }
-
-  public createPublisher = async (opts: CreatePublisherOpts) => {
-    await this.db.put({ _t: T_PUBLISHER, ...opts })
-  }
-
-  public getPublisher = async (opts: GetPublisherOpts) => {
-    return await this.db.findOne({ _t: T_PUBLISHER, ...opts })
-  }
-  public publisherExists = async (opts: GetPublisherOpts) => {
-    try {
-      await this.getPublisher(opts)
-      return false
-    } catch (err) {
-      Errors.ignore(err, Errors.NotFound)
-      return false
-    }
-  }
+const TYPES = {
+  PUBLISHER: 'tradle.PNSPublisher',
+  FRIEND: 'tradle.MyCloudFriend'
 }
 
-export const create = (ctx: PublisherOpts) => new Publisher(ctx)
+export class Publishers {
+  private db: DBHandle
+  constructor({ db }: PublisherOpts) {
+    this.db = db
+  }
+
+  public getPublisher = async (permalink: string) => {
+    return this.db.matchOne(TYPES.FRIEND, {
+      'identity._permalink': permalink
+    })
+  }
+
+  public getPublisherName = async (permalink: string) => {
+    const { name } = await this.getPublisher(permalink)
+    return name
+  }
+
+  // public createPublisher = async (opts: CreatePublisherOpts) => {
+  //   await this.db.put({ _t: T_PUBLISHER, ...opts })
+  // }
+
+  // public getPublisher = async (opts: GetPublisherOpts) => {
+  //   return await this.db.findOne({ _t: T_PUBLISHER, ...opts })
+  // }
+  // public publisherExists = async (opts: GetPublisherOpts) => {
+  //   try {
+  //     await this.getPublisher(opts)
+  //     return false
+  //   } catch (err) {
+  //     Errors.ignore(err, Errors.NotFound)
+  //     return false
+  //   }
+  // }
+}
+
+export const create = (ctx: PublisherOpts) => new Publishers(ctx)

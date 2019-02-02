@@ -5,22 +5,53 @@ plugins:
   # - serverless-webpack
   # - serverless-dynamodb-local
   - serverless-offline
+  - serverless-pseudo-parameters
 
 provider:
   name: aws
   runtime: nodejs8.10
   region: ${self:custom.region}
   stage: dev
+  vars: ${file(./lib/config/index.js):createConfigFromEnv}
   environment:
-    TABLE_NAME: 'tdl-superawesome-ltd-dev-bucket-0'
-    S3_USER_LOG_PREFIX: 'tdl-superawesome-ltd-dev-logs/userlogs'
-    S3_PATH_TO_PUSH_CONF: 'tdl-superawesome-ltd-dev-privconfbucket/conf/push-notifications.json'
-    LOG_LEVEL: 'debug'
-    AWS_REGION: ${self:provider.region}
+    MY_CLOUD_TABLE_NAME:
+      Ref: MyCloudTableName
+    S3_USER_LOGS_PREFIX:
+      Ref: S3UserLogsPrefix
+    S3_PATH_TO_PUSH_CONF:
+      Ref: S3PushConfPath
     NOTIFY_LAMBDA_FUNCTION:
       Ref: NotifyLambdaFunction
-
+    LOG_LEVEL: 'debug'
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:HeadObject
+      Resource:
+        - Ref: S3PushConfPath
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:BatchWriteItem
+      Resource:
+        - Fn::Join:
+            - ''
+            - - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/
+              - Ref: MyCloudTableName
+        - Fn::Join:
+            - ''
+            - - arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/
+              - Ref: MyCloudTableName
+              - '/index/*'
+
+  apiKeys:
+    - privateServicesApiKey
 
 custom:
   region: 'us-east-1'
@@ -28,17 +59,32 @@ custom:
     port: 31013
 
 functions:
-  # createPublisher:
-  #   handler: lib/entrypoint/http/functions/root.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: publisher
+  # PRIVATE API
 
   createPublisher:
-    handler: lib/entrypoint/sns/functions/register-publisher.handler
+    handler: lib/entrypoint/http/functions/root.handler
     events:
-      - sns: register-publisher
+      - http:
+          method: post
+          path: publisher
+          # requires api key to access
+          private: true
+
+  # createPublisher:
+  #   handler: lib/entrypoint/sns/functions/register-publisher.handler
+  #   events:
+  #     - sns: register-publisher
+
+  # PUBLISHER-PRIVATE API
+
+  notify:
+    handler: lib/entrypoint/http/functions/root.handler
+    events:
+      - http:
+          method: post
+          path: notification
+
+  # PUBLIC API (for subscribers)
 
   createSubscriber:
     handler: lib/entrypoint/http/functions/root.handler
@@ -54,13 +100,6 @@ functions:
           method: post
           path: subscription
 
-  notify:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: notification
-
   clearBadge:
     handler: lib/entrypoint/http/functions/root.handler
     events:
@@ -74,3 +113,15 @@ functions:
       - http:
           method: post
           path: userlog
+
+resources:
+  Parameters:
+    S3PushConfPath:
+      Type: String
+      Default: ${self:custom.vars.s3PushConfPath}
+    S3UserLogsPrefix:
+      Type: String
+      Default: ${self:custom.vars.s3UserLogsPrefix}
+    MyCloudTableName:
+      Type: String
+      Default: ${self:custom.vars.myCloudTableName}

@@ -1,4 +1,4 @@
-export = {
+module.exports = {
   _s:
     'CkkKBHAyNTYSQQQ/btClo4MYQf5KkjO10SaM3Ag3CCCubZOTmdRgxe+FaY5W/liCjvzETjS0gCyKEdEfn320e4/Q/mJOorKUGdAtEkgwRgIhAKLNHmqHEHCQMKGlZZIfjHnp9gPmKwXSGz56YRJDcqG2AiEAinIdg1id3sj0ZhdxhFMaOKHCqIjcqJn1/3OC7P/FkII=',
   _t: 'tradle.Identity',

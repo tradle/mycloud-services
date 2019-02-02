@@ -4,9 +4,16 @@ export const targetLocalstack = () => {
   for (const service in localstack) {
     const lowercase = service.toLowerCase()
     AWS.config.update({
-      [service]: {
+      [lowercase]: {
         endpoint: localstack[service]
       }
     })
   }
+
+  AWS.config.update({
+    s3: {
+      s3ForcePathStyle: true,
+      endpoint: localstack.S3
+    }
+  })
 }

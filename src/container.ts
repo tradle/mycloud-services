@@ -1,4 +1,3 @@
-import AWS from 'aws-sdk'
 import promiseProps from 'p-props'
 import { createClientFactory, services } from '@tradle/aws-combo'
 import { create as createSubscriber } from './domain/push-notifications/subscribers'
@@ -16,11 +15,11 @@ import { createStore as createLogStore } from './db/user-logs/log-store'
 import { createTableDefinition } from './config/aws/table-definition'
 import { Config, Container, PushNotifier, RegisterPublisherOpts } from './types'
 import { createLogger } from './utils/logger'
-import { createConfig } from './config'
+import { createConfigFromEnv } from './config'
 import { create as createContainerMiddleware } from './entrypoint/http/middleware/container'
 import models from './models'
-export const createContainer = (config: Config = createConfig()): Container => {
-  const { local, region, s3UserLogPrefix, tableName, logLevel } = config
+export const createContainer = (config: Config = createConfigFromEnv()): Container => {
+  const { local, region, s3UserLogsPrefix, myCloudTableName, logLevel } = config
   if (local) {
     targetLocalstack()
   }
@@ -37,7 +36,7 @@ export const createContainer = (config: Config = createConfig()): Container => {
   const dynamodb = clients.dynamodb()
   const docClient = clients.documentclient()
   const tableDefinition = createTableDefinition({
-    TableName: config.tableName
+    TableName: myCloudTableName
   })
 
   const db = createDBClient({
@@ -51,7 +50,7 @@ export const createContainer = (config: Config = createConfig()): Container => {
   const s3 = clients.s3()
   const keyValueStore = createS3KeyValueStore({
     client: s3,
-    prefix: config.s3UserLogPrefix
+    prefix: s3UserLogsPrefix
   })
 
   const pubSub = createPubSub({
@@ -72,11 +71,20 @@ export const createContainer = (config: Config = createConfig()): Container => {
     prefix: config.s3PushConfBucket
   })
 
-  const pushNotifierPromise = s3ConfBucket.get(config.s3PushConfKey).then(conf => createPushNotifier(conf))
+  const pushNotifierPromise = s3ConfBucket.get(config.s3PushConfKey).then(
+    conf => createPushNotifier(conf),
+    err => {
+      logger.error('failed to load push notifications conf', err)
+      throw err
+    }
+  )
+
+  const logStore = createLogStore(keyValueStore)
+  const userLogs = createUserLogs({ store: logStore })
   const container: Container = {
     db,
     createPublisherTopicName,
-    parsePublisherTopic: parsePublisherTopicArn,
+    parsePublisherTopicArn,
     pubSub,
     // ts hack
     // this requires promiseProps(container) to be run before container is used
@@ -85,21 +93,18 @@ export const createContainer = (config: Config = createConfig()): Container => {
     config,
     logger,
     models,
-    publisherDB: null,
-    subscriberDB: null,
+    publishersDB: null,
+    subscribersDB: null,
     subscribers: null,
     publishers: null,
-    userLogs: null,
+    userLogs,
     containerMiddleware: null,
     ready: null
   }
 
-  const logStore = createLogStore(keyValueStore)
-  container.userLogs = createUserLogs({ store: logStore })
-
-  container.publisherDB = createPublisherDB(container)
+  container.publishersDB = createPublisherDB(container)
   container.publishers = createPublisher(container)
-  container.subscriberDB = createSubscriberDB(container)
+  container.subscribersDB = createSubscriberDB(container)
   container.subscribers = createSubscriber(container)
 
   container.containerMiddleware = createContainerMiddleware(container)
