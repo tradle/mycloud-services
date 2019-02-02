@@ -1,5 +1,4 @@
-import { RouterMiddleware as Middleware } from '../../../types'
-import { SignedDevice } from 'src/domain/push-notifications/subscribers'
+import { RouterMiddleware as Middleware, SignedDevice } from '../../../types'
 
 export const create = (): Middleware => async (ctx, next) => {
   const { subscribers } = ctx.container

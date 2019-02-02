@@ -3,8 +3,8 @@ import { createClientFactory, services } from '@tradle/aws-combo'
 import { create as createSubscriber } from './domain/push-notifications/subscribers'
 import { create as createPublisher } from './domain/push-notifications/publishers'
 import { create as createUserLogs } from './domain/user-logs'
-import { create as createSubscriberDB } from './db/push-notifications/subscribers'
-import { create as createPublisherDB } from './db/push-notifications/publishers'
+import { create as createSubscribersDB } from './db/push-notifications/subscribers'
+import { create as createPublishersDB } from './db/push-notifications/publishers'
 import { createStore as createS3KeyValueStore } from './infra/aws/s3-kv'
 import { createClient as createDBClient } from './infra/aws/db'
 import { createPubSub } from './infra/aws/sns/pub-sub'
@@ -102,9 +102,9 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
     ready: null
   }
 
-  container.publishersDB = createPublisherDB(container)
+  container.publishersDB = createPublishersDB(container)
   container.publishers = createPublisher(container)
-  container.subscribersDB = createSubscriberDB(container)
+  container.subscribersDB = createSubscribersDB(container)
   container.subscribers = createSubscriber(container)
 
   container.containerMiddleware = createContainerMiddleware(container)

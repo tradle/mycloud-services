@@ -5,8 +5,8 @@ import Koa from 'koa'
 import Router from 'koa-router'
 import * as t from 'io-ts'
 import { Publishers } from './domain/push-notifications/publishers'
-import { Publishers as PublishersDB } from './db/push-notifications/publishers'
 import { Subscribers } from './domain/push-notifications/subscribers'
+import { Publishers as PublishersDB } from './db/push-notifications/publishers'
 import { Subscribers as SubscribersDB } from './db/push-notifications/subscribers'
 import { UserLogs } from './domain/user-logs'
 export { PushProtocol } from './constants'
@@ -112,67 +112,6 @@ export interface LogStore {
   put: (key: string, value: string) => Promise<void>
 }
 
-export const PublishOptsV = t.strict({
-  topic: t.string,
-  message: t.string
-})
-
-export type PublishOpts = t.TypeOf<typeof PublishOptsV>
-
-export const SubscribeOptsV = t.strict({
-  topic: t.string,
-  target: t.string
-})
-
-export type SubscribeOpts = t.TypeOf<typeof SubscribeOptsV>
-
-export const AllowPublishOptsV = t.strict({
-  topic: t.string,
-  publisherId: t.string
-})
-
-export type AllowPublishOpts = t.TypeOf<typeof AllowPublishOptsV>
-
-export interface PubSub {
-  publish: (opts: PublishOpts) => Promise<void>
-  subscribe: (opts: SubscribeOpts) => Promise<void>
-  createTopic?: (topic: string) => Promise<void>
-  hasTopic?: (topic: string) => Promise<boolean>
-  allowPublish?: (opts: AllowPublishOpts) => Promise<void>
-}
-
-export interface PushNotifierNotifyOpts {
-  deviceTokens: string[]
-  badge?: number
-  title?: string
-  body?: string
-}
-
-type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<any>
-
-export interface PushNotifier {
-  notify: PushNotifierNotify
-}
-
-export interface Container {
-  db: DBHandle
-  pubSub: PubSub
-  pushNotifier: PushNotifier
-  notificationsTarget: string
-  publishersDB: PublishersDB
-  publishers: Publishers
-  subscribersDB: SubscribersDB
-  subscribers: Subscribers
-  createPublisherTopicName: CreatePublisherTopicName
-  parsePublisherTopicArn: ParsePublisherTopic
-  userLogs: UserLogs
-  config: Config
-  logger: Logger
-  models: Models
-  containerMiddleware: Compose.Middleware<Koa.Context>
-  ready: Promise<void>
-}
-
 export interface StringMap {
   [name: string]: string
 }
@@ -232,6 +171,53 @@ export interface Subscription extends UnsignedTradleObject {
   deviceTokens: string[]
   seq: number
 }
+export interface SubscribersOpts {
+  subscribersDB: SubscribersDB
+}
+
+export const DeviceV = t.type({
+  token: t.string,
+  protocol: t.keyof({
+    apns: true,
+    gcm: true
+  })
+  // protocol: t.keyof(
+  //   PUSH_PROTOCOLS.reduce((obj, name) => {
+  //     obj[name] = true
+  //     return obj
+  //   }, {})
+  // )
+})
+
+export type Device = t.TypeOf<typeof DeviceV>
+
+export const AddSubscriberDeviceOptsV = t.intersection([
+  DeviceV,
+  t.type({
+    subscriber: t.string
+  })
+])
+
+export type AddSubscriberDeviceOpts = t.TypeOf<typeof AddSubscriberDeviceOptsV>
+export interface SignedDevice extends SignedTradleObject, Device {
+  identity: Identity
+}
+export interface RegisterDeviceOpts {
+  device: SignedDevice
+}
+
+export interface Subscription extends SignedTradleObject {
+  publisher: string
+  subscriber: string
+}
+
+export interface CreateSubscriptionOpts {
+  subscription: Subscription
+}
+
+export interface ClearBadgeOpts extends SignedTradleObject {
+  subscriber: string
+}
 
 // Publishers
 
@@ -277,13 +263,21 @@ export type CreatePublisherTopicName = (opts: RegisterPublisherOpts) => string
 export type ParsePublisherTopic = (topic: string) => RegisterPublisherOpts
 export const SubscriberV = t.strict({
   permalink: t.string,
-  devices: t.array(t.string)
+  devices: t.array(DeviceV),
+  subscriptions: t.array(t.string)
 })
 
 export type Subscriber = t.TypeOf<typeof SubscriberV>
 
-// Push Notifier
+export const SerializedSubscriberV = t.type({
+  permalink: t.string,
+  devices: t.array(t.string),
+  subscriptions: t.string
+})
 
+export type SerializedSubscriber = t.TypeOf<typeof SerializedSubscriberV>
+
+// Push Notifier
 export const APNV = t.type({
   cert: t.string,
   key: t.string,
@@ -299,3 +293,66 @@ export const PusherOptsV = t.partial({
 })
 
 export type PusherOpts = t.TypeOf<typeof PusherOptsV>
+
+export const PublishOptsV = t.strict({
+  topic: t.string,
+  message: t.string
+})
+
+export type PublishOpts = t.TypeOf<typeof PublishOptsV>
+
+export const SubscribeOptsV = t.strict({
+  topic: t.string,
+  target: t.string
+})
+
+export type SubscribeOpts = t.TypeOf<typeof SubscribeOptsV>
+
+export const AllowPublishOptsV = t.strict({
+  topic: t.string,
+  publisherId: t.string
+})
+
+export type AllowPublishOpts = t.TypeOf<typeof AllowPublishOptsV>
+
+export interface PubSub {
+  publish: (opts: PublishOpts) => Promise<void>
+  subscribe: (opts: SubscribeOpts) => Promise<void>
+  createTopic?: (topic: string) => Promise<void>
+  hasTopic?: (topic: string) => Promise<boolean>
+  allowPublish?: (opts: AllowPublishOpts) => Promise<void>
+}
+
+export interface PushNotifierNotifyOpts {
+  deviceTokens: string[]
+  badge?: number
+  title?: string
+  body?: string
+}
+
+type PushNotifierNotify = (opts: PushNotifierNotifyOpts) => Promise<any>
+
+export interface PushNotifier {
+  notify: PushNotifierNotify
+}
+
+// Container
+
+export interface Container {
+  db: DBHandle
+  pubSub: PubSub
+  pushNotifier: PushNotifier
+  notificationsTarget: string
+  publishersDB: PublishersDB
+  publishers: Publishers
+  subscribersDB: SubscribersDB
+  subscribers: Subscribers
+  createPublisherTopicName: CreatePublisherTopicName
+  parsePublisherTopicArn: ParsePublisherTopic
+  userLogs: UserLogs
+  config: Config
+  logger: Logger
+  models: Models
+  containerMiddleware: Compose.Middleware<Koa.Context>
+  ready: Promise<void>
+}

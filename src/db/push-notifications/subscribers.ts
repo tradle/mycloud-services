@@ -1,5 +1,14 @@
-import { DBHandle, GetSubcriptionOpts, Subscription, Identity, Subscriber } from '../../types'
+import {
+  DBHandle,
+  GetSubcriptionOpts,
+  Subscription,
+  Identity,
+  Subscriber,
+  SerializedSubscriber,
+  Device
+} from '../../types'
 import { TYPES } from '../../constants'
+import { HexBase64BinaryEncoding } from 'crypto'
 
 export interface SubscribersOpts {
   db: DBHandle
@@ -27,7 +36,8 @@ export class Subscribers {
   public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
     this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
 
-  public updateSubscriber = (sub: Subscriber) => this.update(TYPES.SUBSCRIBER, sub)
+  public updateSubscriber = async (sub: Subscriber) => this.update(TYPES.SUBSCRIBER, sub)
+
   // use put() because subscription is signed
   public updateSubscription = (sub: Subscription) => this.put(TYPES.SUBSCRIPTION, sub)
   public incSubscriberUnreadCount = async (permalink: string) => {
@@ -46,3 +56,47 @@ export class Subscribers {
 }
 
 export const create = (ctx: SubscribersOpts) => new Subscribers(ctx)
+
+export const serializeSubscriber = (sub: Subscriber): SerializedSubscriber => ({
+  ...sub,
+  permalink: hexToBase64(sub.permalink),
+  devices: sub.devices.map(serializeDevice),
+  subscriptions: serializeSubscriptions(sub.subscriptions)
+})
+
+export const unserializeSubscriber = (sub: SerializedSubscriber) => ({
+  ...sub,
+  permalink: base64ToHex(sub.permalink),
+  devices: sub.devices.map(unserializeDevice),
+  subscriptions: unserializeSubscriptions(sub.subscriptions)
+})
+
+export const serializeSubscriptions = (subs: string[]) => new Buffer(subs.join(''), 'hex').toString('base64')
+export const unserializeSubscriptions = (sub: string) =>
+  chunkBuffer(new Buffer(sub, 'base64'), 32).map(buf => buf.toString('hex'))
+
+const chunkBuffer = (buf: Buffer, chunkSize: number) => {
+  const chunks: Buffer[] = []
+  let start = 0
+  while (start < buf.length) {
+    const end = Math.min(start + chunkSize, buf.length)
+    chunks.push(buf.slice(start, end))
+    start += chunkSize
+  }
+
+  return chunks
+}
+
+export const serializeDevice = ({ token, protocol }: Device) => `${protocol}:${token}`
+export const unserializeDevice = (serialized: string) => {
+  const idx = serialized.indexOf(':')
+  return {
+    protocol: serialized.slice(0, idx),
+    token: serialized.slice(idx + 1)
+  }
+}
+
+const reencodeString = (str: string, from: HexBase64BinaryEncoding, to: HexBase64BinaryEncoding) =>
+  new Buffer(str, from).toString(to)
+const hexToBase64 = (str: string) => reencodeString(str, 'hex', 'base64')
+const base64ToHex = (str: string) => reencodeString(str, 'base64', 'hex')

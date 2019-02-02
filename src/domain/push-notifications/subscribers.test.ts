@@ -1,19 +1,14 @@
 require('../../../source-map-install')
 
 import test from 'blue-tape'
+import pick from 'lodash/pick'
 import { Errors } from '@tradle/aws-common-utils'
 import { loudAsync } from '../../utils/loud-async'
-import {
-  create as createSubscribers,
-  RegisterDeviceOpts,
-  serializeDevice,
-  Device,
-  unserializeDevice,
-  SignedDevice
-} from './subscribers'
-import { SubscribersDB, Subscriber } from '../../types'
+import { create as createSubscribers } from './subscribers'
+import { SubscribersDB, Subscriber, Subscription, Device, SignedDevice } from '../../types'
 import subscriberIdentity from '../../../fixtures/identity'
 import * as constants from '../../constants'
+import { serializeDevice, unserializeDevice } from '../../db/push-notifications/subscribers'
 
 test('un/serialize device', t => {
   const device: Device = {
@@ -62,12 +57,45 @@ test(
     const subscribers = createSubscribers({ subscribersDB })
     await subscribers.registerDevice({ device: device1 })
     t.deepEqual(subscriber, await subscribers.getSubscriber({ subscriber: subscriber.permalink }))
-    t.deepEqual(subscriber.devices, [serializeDevice(device1)])
+    t.equal(subscriber.devices[0].token, device1.token)
     t.equal(subscriber.permalink, 'f593c5bec9977f7179aa08fed36d08f87721122ee36c06544154d0d387100a22')
 
     await subscribers.registerDevice({ device: device2 })
     t.deepEqual(subscriber, await subscribers.getSubscriber({ subscriber: subscriber.permalink }))
-    t.deepEqual(subscriber.devices, [device1, device2].map(serializeDevice))
+    t.equal(subscriber.devices[1].token, device2.token)
     t.equal(subscriber.permalink, 'f593c5bec9977f7179aa08fed36d08f87721122ee36c06544154d0d387100a22')
+  })
+)
+
+test(
+  'create subscription',
+  loudAsync(async t => {
+    let subscriber = {} as Subscriber
+    const subscribers = createSubscribers({
+      subscribersDB: {
+        getSubscriber: async opts => {
+          return subscriber
+        },
+        updateSubscriber: async update => {
+          subscriber = update
+        }
+      } as SubscribersDB
+    })
+
+    await subscribers.createSubscription({
+      subscription: {
+        publisher: 'abc'
+      } as Subscription
+    })
+
+    t.deepEqual(subscriber.subscriptions, ['abc'])
+
+    await subscribers.createSubscription({
+      subscription: {
+        publisher: 'efg'
+      } as Subscription
+    })
+
+    t.deepEqual(subscriber.subscriptions, ['abc', 'efg'])
   })
 )

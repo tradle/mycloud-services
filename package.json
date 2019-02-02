@@ -4,7 +4,7 @@
   "description": "Tradle MyCloud services",
   "main": "index.js",
   "scripts": {
-    "test": "tape lib/test/*.js",
+    "test": "tape lib/**/*.test.js",
     "tswatch": "tsc -w",
     "debug": "cross-env SLS_DEBUG=* node --inspect ./node_modules/.bin/sls offline start",
     "debug-brk": "cross-env SLS_DEBUG=* node --inspect-brk ./node_modules/.bin/sls offline start"
