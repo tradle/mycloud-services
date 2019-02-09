@@ -21,6 +21,8 @@
   "types": [
     "node",
     "aws-sdk",
+    "koa",
+    "koa-body",
     "pino",
     "tape",
     "sinon",
