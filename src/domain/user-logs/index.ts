@@ -19,8 +19,19 @@ export class UserLogs {
   public put = async (opts: PutUserLogOpts) => {
     assert.isTypeOf(opts, PutUserLogOptsV)
     const key = getKeyForEvent(opts)
-    await this.store.put(key, opts.log)
+    await this.store.put(key, parseLog(opts.log))
   }
+}
+
+export const parseLog = (log: string) => {
+  if (log.startsWith('"') && log.endsWith('"')) {
+    try {
+      const parsed = JSON.parse(log)
+      if (typeof parsed === 'string') return parsed
+    } catch (err) {}
+  }
+
+  return log
 }
 
 export const create = (ctx: UserLogsOpts) => new UserLogs(ctx)
