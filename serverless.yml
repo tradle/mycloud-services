@@ -72,6 +72,12 @@ custom:
   serverless-offline:
     port: 31013
 
+package:
+  exclude: # Specify the directories and files which should be excluded in the deployment package
+    - .git/**
+    - src/**
+  excludeDevDependencies: true
+
 functions:
   # PRIVATE API
 
@@ -118,6 +124,7 @@ functions:
 
   saveUserLog:
     handler: lib/entrypoint/http/functions/root.handler
+    memorySize: 128
     events:
       - http:
           method: post
