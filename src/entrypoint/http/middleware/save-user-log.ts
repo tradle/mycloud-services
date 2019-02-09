@@ -6,15 +6,15 @@ export const create = (): Middleware => async (ctx, next) => {
 
   const { container, headers, request, query } = ctx
   const { body } = request
-  // if (headers['content-type'] === 'text') {
-  //   opts = {
-  //     firstName: query.firstName,
-  //     lastName: query.lastName,
-  //     log: rawBody
-  //   }
-  // } else {
-  opts = pick(body, ['firstName', 'lastName', 'log']) as PutUserLogOpts
-  // }
+  if (headers['content-type'].startsWith('text')) {
+    opts = {
+      firstName: query.firstName,
+      lastName: query.lastName,
+      log: body
+    }
+  } else {
+    opts = pick(body, ['firstName', 'lastName', 'log']) as PutUserLogOpts
+  }
 
   await container.userLogs.put(opts)
   await next()

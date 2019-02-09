@@ -35,10 +35,11 @@ export const createStore = ({ client, prefix, defaultPutOpts = {} }: CreateStore
   }
 
   const put = async (key: string, value: any) => {
+    const Body: string = typeof value === 'string' ? value : JSON.stringify(value)
     const opts = {
       ...defaultPutOpts,
       ...getOptsForKey(key),
-      Body: JSON.stringify(value)
+      Body
       // ContentType: 'application/json'
     }
 

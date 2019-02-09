@@ -6,9 +6,9 @@ import { toDateParts } from './date'
 const randomString = (bytes: number, enc: HexBase64BinaryEncoding) => crypto.randomBytes(bytes).toString(enc)
 
 export const getKeyForEvent = ({ firstName, lastName, log }: PutUserLogOpts) => {
-  const { year, month, day, hour, minute } = toDateParts(new Date().getTime())
+  const { year, month, day, hour, minute, second } = toDateParts(new Date().getTime())
   const name = firstName && lastName ? `${firstName}-${lastName}` : firstName || lastName
-  return `${year}-${month}-${day}/${hour}:00/${name}.${randomString(6, 'hex')}.txt`
+  return `${year}-${month}-${day}/${hour}:00/${minute}:${second}:${name}.${randomString(6, 'hex')}.txt`
 }
 
 export class UserLogs {
@@ -19,19 +19,19 @@ export class UserLogs {
   public put = async (opts: PutUserLogOpts) => {
     assert.isTypeOf(opts, PutUserLogOptsV)
     const key = getKeyForEvent(opts)
-    await this.store.put(key, parseLog(opts.log))
+    await this.store.put(key, opts.log)
   }
 }
 
-export const parseLog = (log: string) => {
-  if (log.startsWith('"') && log.endsWith('"')) {
-    try {
-      const parsed = JSON.parse(log)
-      if (typeof parsed === 'string') return parsed
-    } catch (err) {}
-  }
+// export const parseLog = (log: string) => {
+//   if (log.startsWith('"') && log.endsWith('"')) {
+//     try {
+//       const parsed = JSON.parse(log)
+//       if (typeof parsed === 'string') return parsed
+//     } catch (err) {}
+//   }
 
-  return log
-}
+//   return log
+// }
 
 export const create = (ctx: UserLogsOpts) => new UserLogs(ctx)

@@ -1,7 +1,7 @@
 import Koa from 'koa'
 import Router from 'koa-router'
 import cors from 'kcors'
-import bodyParser from 'koa-body'
+import bodyParser from 'koa-bodyparser'
 import compression from 'koa-compress'
 import { Config, RouterMiddleware as Middleware } from '../../types'
 import { loadMiddleware } from './load-middleware'
@@ -21,7 +21,11 @@ export const createRouter = ({ config, containerMiddleware }: RouterOpts) => {
 
   router
     .use(cors())
-    .use(bodyParser())
+    .use(
+      bodyParser({
+        enableTypes: ['json', 'text']
+      })
+    )
     .use(compression())
 
   router.use(containerMiddleware)
