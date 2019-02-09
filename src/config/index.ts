@@ -5,6 +5,7 @@ import { parseS3Path, parseArn } from '@tradle/aws-common-utils'
 import { Config, ConfigV, LogLevel } from '../types'
 import * as assert from '../utils/assert'
 import { load as loadEnv } from './load-env'
+import { FUNCTIONS } from '../constants'
 
 const ENV = loadEnv()
 
@@ -60,6 +61,8 @@ export const createConfig = (env: any) => {
 }
 
 export const createConfigFromEnv = () => createConfig(process.env)
+
+export const isFunction = (actualName: string, shortName: string) => actualName.endsWith(FUNCTIONS[shortName])
 
 // export const local = (env=process.env) => ({
 //   s3PushConfPath: 'tdl-tradle-ltd-dev-privateconf/services/pns.json',

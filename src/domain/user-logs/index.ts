@@ -1,22 +1,11 @@
-import * as t from 'io-ts'
-import { LogStore } from '../../types'
+import crypto, { HexBase64BinaryEncoding } from 'crypto'
+import { LogStore, UserLogsOpts, PutUserLogOpts, PutUserLogOptsV } from '../../types'
 import * as assert from '../../utils/assert'
 
-interface UserLogsOpts {
-  store: LogStore
-}
-
-const PutUserLogOptsV = t.type({
-  firstName: t.string,
-  lastName: t.string,
-  log: t.string
-})
-
-type PutUserLogOpts = t.TypeOf<typeof PutUserLogOptsV>
-
+const randomString = (bytes: number, enc: HexBase64BinaryEncoding) => crypto.randomBytes(bytes).toString(enc)
 export const getISODate = () => new Date().toISOString()
 export const getKeyForEvent = ({ firstName, lastName, log }: PutUserLogOpts) =>
-  `${getISODate()} ${firstName} ${lastName}.txt`
+  `${getISODate()}-r${randomString(6, 'hex')} ${firstName} ${lastName}.txt`
 
 export class UserLogs {
   private store: LogStore
@@ -25,7 +14,8 @@ export class UserLogs {
   }
   public put = async (opts: PutUserLogOpts) => {
     assert.isTypeOf(opts, PutUserLogOptsV)
-    await this.store.put(getKeyForEvent(opts), opts.log)
+    const key = getKeyForEvent(opts)
+    await this.store.put(key, opts.log)
   }
 }
 

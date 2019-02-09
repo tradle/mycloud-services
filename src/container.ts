@@ -1,9 +1,10 @@
 import promiseProps from 'p-props'
 import omit from 'lodash/omit'
-import { createClientFactory, services } from '@tradle/aws-combo'
+import { createClient as createSNSClient } from '@tradle/aws-sns-client'
+import { createClientFactory } from '@tradle/aws-client-factory'
 import { create as createSubscriber } from './domain/push-notifications/subscribers'
 import { create as createPublisher } from './domain/push-notifications/publishers'
-import { create as createUserLogs } from './domain/user-logs'
+import { create as createUserLogs, UserLogs } from './domain/user-logs'
 import { create as createSubscribersDB } from './db/push-notifications/subscribers'
 import { create as createPublishersDB } from './db/push-notifications/publishers'
 import { createStore as createS3KeyValueStore } from './infra/aws/s3-kv'
@@ -14,11 +15,12 @@ import { targetLocalstack } from './infra/aws/target-localstack'
 import { createPushNotifier } from './infra/push-notifications'
 import { createStore as createLogStore } from './db/user-logs/log-store'
 import { createTableDefinition } from './config/aws/table-definition'
-import { Config, Container, PushNotifier, RegisterPublisherOpts } from './types'
+import { Config, Container, PushNotifier, RegisterPublisherOpts, LogStore } from './types'
 import { createLogger } from './utils/logger'
-import { createConfigFromEnv } from './config'
+import { createConfigFromEnv, isFunction } from './config'
 import { create as createContainerMiddleware } from './entrypoint/http/middleware/container'
 import models from './models'
+import { FUNCTIONS } from './constants'
 export const createContainer = (config: Config = createConfigFromEnv()): Container => {
   const { local, region, s3UserLogsPrefix, myCloudTableName, logLevel } = config
   if (local) {
@@ -49,13 +51,16 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
   })
 
   const s3 = clients.s3()
-  const keyValueStore = createS3KeyValueStore({
+  const kvStoreLogs = createS3KeyValueStore({
     client: s3,
-    prefix: s3UserLogsPrefix
+    prefix: s3UserLogsPrefix,
+    defaultPutOpts: {
+      ContentType: 'text'
+    }
   })
 
   const pubSub = createPubSub({
-    sns: services.sns({ clients })
+    sns: createSNSClient({ clients })
   })
 
   const createPublisherTopicName = (opts: RegisterPublisherOpts) =>
@@ -69,20 +74,31 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
 
   const s3ConfBucket = createS3KeyValueStore({
     client: s3,
-    prefix: config.s3PushConfBucket
+    prefix: config.s3PushConfBucket,
+    defaultPutOpts: {
+      ContentType: 'application/json'
+    }
   })
 
-  const promisePushConf = s3ConfBucket.get(config.s3PushConfKey)
-  const pushNotifierPromise = promisePushConf.then(
-    conf => createPushNotifier(conf),
-    err => {
-      logger.error('failed to load push notifications conf', err)
-      throw err
-    }
-  )
+  // TODO: declare each function's deps more explicitly
+  let pushNotifierPromise
+  let logStore: LogStore
+  let userLogs: UserLogs
+  if (isFunction(config.functionName, FUNCTIONS.saveUserLog)) {
+    pushNotifierPromise = Promise.resolve(null)
+    logStore = createLogStore(kvStoreLogs)
+    userLogs = createUserLogs({ store: logStore })
+  } else {
+    const promisePushConf = s3ConfBucket.get(config.s3PushConfKey)
+    pushNotifierPromise = promisePushConf.then(
+      conf => createPushNotifier(conf),
+      err => {
+        logger.error('failed to load push notifications conf', err)
+        throw err
+      }
+    )
+  }
 
-  const logStore = createLogStore(keyValueStore)
-  const userLogs = createUserLogs({ store: logStore })
   const container: Container = {
     db,
     createPublisherTopicName,

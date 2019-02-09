@@ -93,7 +93,6 @@ export class Subscribers {
   //    await this.
   // }
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
-    debugger
     const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
     await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
   }

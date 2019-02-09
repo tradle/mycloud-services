@@ -6,3 +6,11 @@ export const TYPES = {
   SUBSCRIPTION: 'tradle.services.PNSSubscription',
   PUBLISHER: 'tradle.services.PNSPublisher'
 }
+
+export const FUNCTIONS = {
+  saveUserLog: 'saveUserLog',
+  registerDevice: 'registerDevice',
+  subscribe: 'subscribe',
+  notify: 'notify',
+  clearBadge: 'clearBadge'
+}

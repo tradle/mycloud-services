@@ -344,6 +344,20 @@ export interface PushNotifier {
   notify: PushNotifierNotify
 }
 
+// User Logs
+
+export interface UserLogsOpts {
+  store: LogStore
+}
+
+export const PutUserLogOptsV = t.type({
+  firstName: t.string,
+  lastName: t.string,
+  log: t.string
+})
+
+export type PutUserLogOpts = t.TypeOf<typeof PutUserLogOptsV>
+
 // Container
 
 export interface Container {

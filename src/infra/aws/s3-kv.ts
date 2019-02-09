@@ -3,6 +3,7 @@ import { KeyValueStore } from '../../types'
 interface CreateStoreOpts {
   client: AWS.S3
   prefix: string
+  defaultPutOpts?: Partial<AWS.S3.PutObjectRequest>
 }
 
 const parsePrefix = (prefix: string) => {
@@ -21,7 +22,7 @@ const parsePrefix = (prefix: string) => {
   }
 }
 
-export const createStore = ({ client, prefix }: CreateStoreOpts): KeyValueStore => {
+export const createStore = ({ client, prefix, defaultPutOpts = {} }: CreateStoreOpts): KeyValueStore => {
   const { bucket, keyPrefix } = parsePrefix(prefix)
   const getOptsForKey = key => ({
     Bucket: bucket,
@@ -29,17 +30,19 @@ export const createStore = ({ client, prefix }: CreateStoreOpts): KeyValueStore 
   })
 
   const get = async (key: string) => {
-    return client.getObject(getOptsForKey(key)).promise()
+    const opts = getOptsForKey(key)
+    return client.getObject(opts).promise()
   }
 
   const put = async (key: string, value: any) => {
-    await client
-      .putObject({
-        ...getOptsForKey(key),
-        Body: JSON.stringify(value),
-        ContentType: 'application/json'
-      })
-      .promise()
+    const opts = {
+      ...defaultPutOpts,
+      ...getOptsForKey(key),
+      Body: JSON.stringify(value)
+      // ContentType: 'application/json'
+    }
+
+    await client.putObject(opts).promise()
   }
 
   return { get, put }

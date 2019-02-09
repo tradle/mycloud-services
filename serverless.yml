@@ -19,8 +19,8 @@ provider:
       Ref: S3UserLogsPrefix
     S3_PATH_TO_PUSH_CONF:
       Ref: S3PushConfPath
-    NOTIFY_LAMBDA_FUNCTION:
-      Ref: NotifyLambdaFunction
+    # NOTIFY_LAMBDA_FUNCTION:
+    #   Ref: NotifyLambdaFunction
     ACCOUNT_ID:
       Ref: AWS::AccountId
     LOG_LEVEL: 'debug'
@@ -30,7 +30,19 @@ provider:
         - s3:GetObject
         - s3:HeadObject
       Resource:
-        - Ref: S3PushConfPath
+        - Fn::Join:
+            - ''
+            - - 'arn:aws:s3:::'
+              - Ref: S3PushConfPath
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+      Resource:
+        - Fn::Join:
+            - ''
+            - - 'arn:aws:s3:::'
+              - Ref: S3UserLogsPrefix
+              - '/*'
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -63,58 +75,54 @@ custom:
 functions:
   # PRIVATE API
 
-  registerPublisher:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: pns/publisher
-          # requires api key to access
-          private: true
-
-  # createPublisher:
-  #   handler: lib/entrypoint/sns/functions/register-publisher.handler
+  # registerPublisher:
+  #   handler: lib/entrypoint/http/functions/root.handler
   #   events:
-  #     - sns: register-publisher
+  #     - http:
+  #         method: post
+  #         path: pns/publisher
+  #         # requires api key to access
+  #         private: true
 
-  # PUBLISHER-PRIVATE API
+  # # PUBLISHER-PRIVATE API
 
-  notify:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: pns/notification
+  # notify:
+  #   handler: lib/entrypoint/http/functions/root.handler
+  #   events:
+  #     - http:
+  #         method: post
+  #         path: pns/notification
 
-  # PUBLIC API (for subscribers)
+  # # PUBLIC API (for subscribers)
 
-  registerDevice:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: pns/subscriber
+  # registerDevice:
+  #   handler: lib/entrypoint/http/functions/root.handler
+  #   events:
+  #     - http:
+  #         method: post
+  #         path: pns/subscriber
 
-  subscribe:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: pns/subscription
+  # subscribe:
+  #   handler: lib/entrypoint/http/functions/root.handler
+  #   events:
+  #     - http:
+  #         method: post
+  #         path: pns/subscription
 
-  clearBadge:
-    handler: lib/entrypoint/http/functions/root.handler
-    events:
-      - http:
-          method: post
-          path: pns/clearbadge
+  # clearBadge:
+  #   handler: lib/entrypoint/http/functions/root.handler
+  #   events:
+  #     - http:
+  #         method: post
+  #         path: pns/clearbadge
 
   saveUserLog:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
-          path: userlog
+          path: logs/userlog
+          private: true
 
 resources:
   Parameters:
