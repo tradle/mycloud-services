@@ -26,14 +26,20 @@ export const createRouter = ({ config, containerMiddleware }: RouterOpts) => {
 
   router.use(containerMiddleware)
   router.use(loadMiddleware('error'))
-  router.post('/subscriber', loadMiddleware('subscriber'))
-  router.post('/publisher', loadMiddleware('publisher'))
-  router.post('/subscriber', loadMiddleware('subscriber'))
-  router.post('/subscription', loadMiddleware('subscription'))
-  router.post('/notification', loadMiddleware('notification'))
-  router.post('/clearbadge', loadMiddleware('clear-badge'))
+  router.post('/pns/subscriber', loadMiddleware('register-device'))
+  router.post('/pns/subscription', loadMiddleware('subscribe'))
+  router.post('/pns/clearbadge', loadMiddleware('clear-badge'))
+  router.post('/pns/publisher', loadMiddleware('register-publisher'))
+  router.post('/pns/notification', loadMiddleware('notify'))
 
   koa.use(router.routes())
   koa.use(router.allowedMethods())
+  koa.use(async (ctx, next) => {
+    await next()
+    if (!ctx.body) {
+      ctx.body = {}
+    }
+  })
+
   return koa
 }

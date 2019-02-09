@@ -1,6 +1,6 @@
 import Status from 'http-status'
 import { RouterMiddleware as Middleware } from '../../../types'
-import * as Errors from '../../../errors'
+import Errors from '../../../errors'
 
 export const create = (): Middleware => async (ctx, next) => {
   try {
@@ -8,7 +8,7 @@ export const create = (): Middleware => async (ctx, next) => {
   } catch (err) {
     const { logger } = ctx.container
     logger.error(err)
-    if (err instanceof Errors.UserError) {
+    if (err instanceof Errors.UserError || err instanceof Errors.InvalidOption) {
       ctx.status = Status.BAD_REQUEST
       ctx.body = { message: err.message }
       return

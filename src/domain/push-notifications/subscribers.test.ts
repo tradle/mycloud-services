@@ -1,8 +1,7 @@
 require('../../../source-map-install')
 
 import test from 'blue-tape'
-import pick from 'lodash/pick'
-import { Errors } from '@tradle/aws-common-utils'
+import Errors from '../../errors'
 import { loudAsync } from '../../utils/loud-async'
 import { create as createSubscribers } from './subscribers'
 import { SubscribersDB, Subscriber, Subscription, Device, SignedDevice } from '../../types'
@@ -46,7 +45,7 @@ test(
       getSubscriber: async opts => {
         if (subscriber) return subscriber
 
-        throw new Errors.NotFound(`subscriber ${opts.subscriber}`)
+        throw new Errors.NotFound(`subscriber ${opts.permalink}`)
       },
       updateSubscriber: async sub => {
         subscriber = sub
@@ -56,12 +55,12 @@ test(
     let subscriber: Subscriber
     const subscribers = createSubscribers({ subscribersDB })
     await subscribers.registerDevice({ device: device1 })
-    t.deepEqual(subscriber, await subscribers.getSubscriber({ subscriber: subscriber.permalink }))
+    t.deepEqual(subscriber, await subscribers.getSubscriber({ permalink: subscriber.permalink }))
     t.equal(subscriber.devices[0].token, device1.token)
     t.equal(subscriber.permalink, 'f593c5bec9977f7179aa08fed36d08f87721122ee36c06544154d0d387100a22')
 
     await subscribers.registerDevice({ device: device2 })
-    t.deepEqual(subscriber, await subscribers.getSubscriber({ subscriber: subscriber.permalink }))
+    t.deepEqual(subscriber, await subscribers.getSubscriber({ permalink: subscriber.permalink }))
     t.equal(subscriber.devices[1].token, device2.token)
     t.equal(subscriber.permalink, 'f593c5bec9977f7179aa08fed36d08f87721122ee36c06544154d0d387100a22')
   })

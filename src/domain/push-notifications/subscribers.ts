@@ -1,6 +1,5 @@
-import uniq from 'lodash/uniq'
 import tradle from '@tradle/protocol'
-import Errors from '@tradle/errors'
+import { Errors } from '@tradle/aws-common-utils'
 import {
   SubscribersDB,
   GetSubcriptionOpts,
@@ -12,16 +11,28 @@ import {
   ClearBadgeOpts,
   SubscribersOpts,
   Device,
-  CreateSubscriptionOpts
+  CreateSubscriptionOpts,
+  SignedTradleObject
 } from '../../types'
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from '../../constants'
 import * as assert from '../../utils/assert'
 
-export const validateSubscriberDevice = ({ device }: RegisterDeviceOpts) => {
+export const validateDevice = async (opts: RegisterDeviceOpts) => {
+  if (!(opts && opts.device)) throw new Errors.InvalidOption(`invalid subscriber device`)
+
+  const { device } = opts
   const { identity, token, protocol } = device
-  crypto.validateSig({ object: identity, identity })
-  crypto.validateSig({ object: device, identity })
+  const author = {
+    object: identity,
+    permalink: identity[tradle.constants.PERMALINK],
+    link: tradle.linkString(identity)
+  }
+
+  await crypto.validateSig({ object: identity, author })
+  if (!author.permalink) author.permalink = author.link
+
+  await crypto.validateSig({ object: device, author })
 
   // TODO: verify
   if (!PUSH_PROTOCOLS.includes(protocol)) {
@@ -34,14 +45,11 @@ export const validateSubscriberDevice = ({ device }: RegisterDeviceOpts) => {
 }
 
 export class Subscribers {
+  public validateDevice = validateDevice
   private db: SubscribersDB
-  public get validateSubscriber() {
-    return validateSubscriberDevice
-  }
   constructor({ subscribersDB: subscriberDB }: SubscribersOpts) {
     this.db = subscriberDB
   }
-
   public registerDevice = async ({ device }: RegisterDeviceOpts) => {
     const { identity, token, protocol } = device
     // add device token for subscriber permalink
@@ -59,9 +67,9 @@ export class Subscribers {
     const { subscriber, token, protocol } = opts
     let sub: Subscriber
     try {
-      sub = await this.getSubscriber({ subscriber })
+      sub = await this.getSubscriber({ permalink: subscriber })
     } catch (err) {
-      Errors.ignore(err, Errors.NotFound)
+      Errors.ignoreNotFound(err)
       sub = {
         permalink: subscriber,
         devices: [],
@@ -80,8 +88,13 @@ export class Subscribers {
     await this.db.updateSubscriber({ ...sub, devices })
   }
 
+  // public validateAuthor = (object: SignedTradleObject) => {
+  //    const { _author } = object
+  //    await this.
+  // }
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
-    const subscriber = await this.db.getSubscriber(subscription)
+    debugger
+    const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
     await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
   }
 

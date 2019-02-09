@@ -1,5 +1,5 @@
 import { Type } from 'io-ts'
-import * as Errors from '../errors'
+import Errors from '../errors'
 
 type PrimitiveType = 'string' | 'number' | 'object' | 'boolean' | 'undefined' | 'function'
 

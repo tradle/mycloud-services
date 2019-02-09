@@ -43,6 +43,9 @@ const BADGES = {
 
 export class Publishers {
   constructor(private opts: PublishersOpts) {}
+  /**
+   * idempotent
+   */
   public register = async (opts: RegisterPublisherOpts) => {
     assert.isTypeOf(opts, RegisterPublisherOptsV)
 

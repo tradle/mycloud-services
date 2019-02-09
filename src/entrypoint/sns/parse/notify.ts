@@ -1,6 +1,6 @@
 import { SNSEvent } from 'aws-lambda'
 import { Container, NotifyOpts } from '../../../types'
-import * as Errors from '../../../errors'
+import Errors from '../../../errors'
 
 interface ParseEventOpts {
   container: Container

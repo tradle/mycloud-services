@@ -1,4 +1,5 @@
 import promiseProps from 'p-props'
+import omit from 'lodash/omit'
 import { createClientFactory, services } from '@tradle/aws-combo'
 import { create as createSubscriber } from './domain/push-notifications/subscribers'
 import { create as createPublisher } from './domain/push-notifications/publishers'
@@ -71,7 +72,8 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
     prefix: config.s3PushConfBucket
   })
 
-  const pushNotifierPromise = s3ConfBucket.get(config.s3PushConfKey).then(
+  const promisePushConf = s3ConfBucket.get(config.s3PushConfKey)
+  const pushNotifierPromise = promisePushConf.then(
     conf => createPushNotifier(conf),
     err => {
       logger.error('failed to load push notifications conf', err)
@@ -108,7 +110,7 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
   container.subscribers = createSubscriber(container)
 
   container.containerMiddleware = createContainerMiddleware(container)
-  container.ready = promiseProps(container).then(resolved => {
+  container.ready = promiseProps(omit(container, ['ready'])).then(resolved => {
     Object.assign(container, resolved)
   })
 

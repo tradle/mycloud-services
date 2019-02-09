@@ -11,6 +11,7 @@ import { Subscribers as SubscribersDB } from './db/push-notifications/subscriber
 import { UserLogs } from './domain/user-logs'
 export { PushProtocol } from './constants'
 export { DBHandle, Model, Models, PublishersDB, SubscribersDB }
+export { ClientFactory } from '@tradle/aws-client-factory'
 
 export interface TableDefinition extends AWS.DynamoDB.CreateTableInput {}
 
@@ -49,6 +50,7 @@ const CommonConfig = t.type({
   s3UserLogsPrefix: t.string,
   s3PushConfBucket: t.string,
   s3PushConfKey: t.string,
+  s3PushConfPath: t.string,
   logLevel: LogLevelV,
   myCloudTableName: t.string
 })
@@ -107,6 +109,12 @@ export interface KeyValueStore {
   put: (key: string, value: any) => Promise<void>
   get: (key: string) => Promise<any>
 }
+
+// export interface StoredValue<T> {
+//   get: () => Promise<T>
+//   set: (value: T) => Promise<void>
+// }
+// export interface PushConfStore extends StoredValue<PusherOpts> {}
 
 export interface LogStore {
   put: (key: string, value: string) => Promise<void>
@@ -354,5 +362,6 @@ export interface Container {
   logger: Logger
   models: Models
   containerMiddleware: Compose.Middleware<Koa.Context>
+  // pushConf: PushConfStore
   ready: Promise<void>
 }

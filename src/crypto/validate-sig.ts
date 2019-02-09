@@ -1,22 +1,25 @@
 import { promisify } from 'util'
 import tradle from '@tradle/engine'
-import * as Errors from '../errors'
+import Errors from '../errors'
 import { Identity, SignedTradleObject } from '../types'
 
 const validator = tradle.validator()
 const checkAuthentic = promisify(validator.checkAuthentic)
 
-interface ValidateSigOpts {
-  object: SignedTradleObject
-  identity: Identity
+interface Author {
+  object: Identity
+  permalink?: string
+  link?: string
 }
 
-export const validateSig = async ({ object, identity }: ValidateSigOpts): Promise<void> => {
+interface ValidateSigOpts {
+  object: SignedTradleObject
+  author: Author
+}
+
+export const validateSig = async ({ object, author }: ValidateSigOpts): Promise<void> => {
   try {
-    await checkAuthentic({
-      object,
-      author: { object: identity }
-    })
+    await checkAuthentic({ object, author })
   } catch (err) {
     throw new Errors.InvalidSignature(`invalid signature on ${object._t}`)
   }

@@ -18,7 +18,7 @@ export interface SubscribersOpts {
 export interface CreateSubscriptionOpts {}
 export interface AddDeviceOpts {}
 export interface GetSubscriberOpts {
-  subscriber: string
+  permalink: string
 }
 
 export class Subscribers {
@@ -31,8 +31,8 @@ export class Subscribers {
 
   public createSubscription = async (opts: CreateSubscriptionOpts) => this.put(TYPES.SUBSCRIPTION, opts)
 
-  public getSubscriber = async ({ subscriber }: GetSubscriberOpts) =>
-    this.db.matchOne(TYPES.SUBSCRIBER, { subscriber }) as Promise<Subscriber>
+  public getSubscriber = async ({ permalink }: GetSubscriberOpts) =>
+    this.db.matchOne(TYPES.SUBSCRIBER, { permalink }) as Promise<Subscriber>
   public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
     this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
 

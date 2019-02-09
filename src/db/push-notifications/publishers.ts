@@ -1,6 +1,6 @@
 import omit from 'lodash/omit'
 import buildResource from '@tradle/build-resource'
-import Errors from '@tradle/errors'
+import * as Errors from '@tradle/errors'
 import { DBHandle, Identity, Models, RegisterPublisherOpts } from '../../types'
 
 interface PublisherOpts {

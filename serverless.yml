@@ -12,7 +12,6 @@ provider:
   runtime: nodejs8.10
   region: ${self:custom.region}
   stage: dev
-  vars: ${file(./lib/config/index.js):createConfigFromEnv}
   environment:
     MY_CLOUD_TABLE_NAME:
       Ref: MyCloudTableName
@@ -22,6 +21,8 @@ provider:
       Ref: S3PushConfPath
     NOTIFY_LAMBDA_FUNCTION:
       Ref: NotifyLambdaFunction
+    ACCOUNT_ID:
+      Ref: AWS::AccountId
     LOG_LEVEL: 'debug'
   iamRoleStatements:
     - Effect: Allow
@@ -55,18 +56,19 @@ provider:
 
 custom:
   region: 'us-east-1'
+  vars: ${file(./lib/config/index.js):createConfigFromEnv}
   serverless-offline:
     port: 31013
 
 functions:
   # PRIVATE API
 
-  createPublisher:
+  registerPublisher:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
-          path: publisher
+          path: pns/publisher
           # requires api key to access
           private: true
 
@@ -82,30 +84,30 @@ functions:
     events:
       - http:
           method: post
-          path: notification
+          path: pns/notification
 
   # PUBLIC API (for subscribers)
 
-  createSubscriber:
+  registerDevice:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
-          path: subscriber
+          path: pns/subscriber
 
-  createSubscription:
+  subscribe:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
-          path: subscription
+          path: pns/subscription
 
   clearBadge:
     handler: lib/entrypoint/http/functions/root.handler
     events:
       - http:
           method: post
-          path: clearbadge
+          path: pns/clearbadge
 
   saveUserLog:
     handler: lib/entrypoint/http/functions/root.handler

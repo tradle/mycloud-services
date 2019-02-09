@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "watch": true,
     "lib": ["es2017"],
     "moduleResolution": "node",
     "module": "commonjs",
@@ -17,8 +18,18 @@
       //   "@assert": ["src/assert.ts"]
     }
   },
-  "types": ["node", "aws-sdk", "pino", "tape", "sinon", "lodash", "@tradle/dynamodb", "@tradle/aws-utils"],
-  "include": ["src/**/*.ts"],
+  "types": [
+    "node",
+    "aws-sdk",
+    "pino",
+    "tape",
+    "sinon",
+    "lodash",
+    "@tradle/dynamodb",
+    "@tradle/aws-utils",
+    "@tradle/errors"
+  ],
+  "include": ["src/**/*.ts", "scripts/**/*.ts"],
   "exclude": ["node_modules"],
   "compileOnSave": true
 }

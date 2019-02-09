@@ -1,5 +1,5 @@
 import { PubSub } from '../../../types'
-import { SNSClient } from '@tradle/aws-sns-client'
+import { SNSClient, parseTopicArn } from '@tradle/aws-sns-client'
 
 interface SNSPubSubOpts {
   sns: SNSClient
@@ -17,9 +17,11 @@ export class SNSPubSub implements PubSub {
   public get subscribe() {
     return this.sns.subscribeIfNotSubscribed.bind(this.sns)
   }
-  public get createTopic() {
-    return this.sns.createTopic.bind(this.sns)
+  public createTopic = async (arn: string) => {
+    const { name, region } = parseTopicArn(arn)
+    await this.sns.createTopic({ name, region })
   }
+
   public allowPublish = async ({ topic, publisherId }) => {
     await this.sns.allowCrossAccountPublish(topic, [publisherId])
   }

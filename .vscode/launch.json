@@ -29,7 +29,7 @@
       "sourceMaps": true,
       "env": {
         "NODE_ENV": "development",
-        "SERVERLESS_OFFLINE": "1"
+        "IS_OFFLINE": "1"
       }
     },
     {
@@ -44,7 +44,7 @@
       "sourceMaps": true,
       "env": {
         "NODE_ENV": "development",
-        "SERVERLESS_OFFLINE": "1"
+        "IS_OFFLINE": "1"
       }
     }
   ]

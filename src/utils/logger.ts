@@ -1,7 +1,7 @@
 import pino from 'pino'
 import { Logger } from '../types'
 
-export const createLogger = (opts: pino.LoggerOptions) => {
+export const createLogger = (opts: pino.LoggerOptions = {}) => {
   const logger: unknown = pino({
     useLevelLabels: true,
     customLevels: {

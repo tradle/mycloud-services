@@ -1,19 +1,20 @@
-export class UserError extends Error {
-  public type = 'UserError'
-}
+import * as Errors from '@tradle/errors'
 
-export class InvalidOption extends UserError {
-  public type = 'InvalidOption'
-}
-
-export class InvalidSignature extends UserError {
+class InvalidSignature extends Errors.UserError {
   public type = 'InvalidSignature'
 }
 
-export class NotImplemented extends Error {
+class NotImplemented extends Error {
   public type = 'NotImplemented'
 }
 
-export class Unsupported extends Error {
+class Unsupported extends Error {
   public type = 'Unsupported'
+}
+
+export = {
+  ...Errors,
+  InvalidSignature,
+  NotImplemented,
+  Unsupported
 }
