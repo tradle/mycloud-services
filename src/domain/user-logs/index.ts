@@ -1,11 +1,15 @@
 import crypto, { HexBase64BinaryEncoding } from 'crypto'
 import { LogStore, UserLogsOpts, PutUserLogOpts, PutUserLogOptsV } from '../../types'
 import * as assert from '../../utils/assert'
+import { toDateParts } from './date'
 
 const randomString = (bytes: number, enc: HexBase64BinaryEncoding) => crypto.randomBytes(bytes).toString(enc)
-export const getISODate = () => new Date().toISOString()
-export const getKeyForEvent = ({ firstName, lastName, log }: PutUserLogOpts) =>
-  `${getISODate()}-r${randomString(6, 'hex')} ${firstName} ${lastName}.txt`
+
+export const getKeyForEvent = ({ firstName, lastName, log }: PutUserLogOpts) => {
+  const { year, month, day, hour, minute } = toDateParts(new Date().getTime())
+  const name = firstName && lastName ? `${firstName}-${lastName}` : firstName || lastName
+  return `${year}-${month}-${day}/${hour}:00/${name}.${randomString(6, 'hex')}.txt`
+}
 
 export class UserLogs {
   private store: LogStore
