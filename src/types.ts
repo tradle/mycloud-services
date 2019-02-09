@@ -350,11 +350,15 @@ export interface UserLogsOpts {
   store: LogStore
 }
 
-export const PutUserLogOptsV = t.type({
-  firstName: t.string,
-  lastName: t.string,
-  log: t.string
-})
+export const PutUserLogOptsV = t.intersection([
+  t.type({
+    firstName: t.string,
+    log: t.string
+  }),
+  t.partial({
+    lastName: t.string
+  })
+])
 
 export type PutUserLogOpts = t.TypeOf<typeof PutUserLogOptsV>
 
