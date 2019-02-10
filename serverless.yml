@@ -129,7 +129,7 @@ functions:
       - http:
           method: post
           path: logs/userlog
-          # private: true
+          private: true
 
 resources:
   Parameters:
