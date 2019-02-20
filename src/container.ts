@@ -2,16 +2,17 @@ import promiseProps from 'p-props'
 import omit from 'lodash/omit'
 import { createClient as createSNSClient } from '@tradle/aws-sns-client'
 import { createClientFactory } from '@tradle/aws-client-factory'
+import { parseS3Path, targetLocalstack } from '@tradle/aws-common-utils'
+import { wrapBucket, createClient as createS3Client } from '@tradle/aws-s3-client'
 import { create as createSubscriber } from './domain/push-notifications/subscribers'
 import { create as createPublisher } from './domain/push-notifications/publishers'
 import { create as createUserLogs, UserLogs } from './domain/user-logs'
 import { create as createSubscribersDB } from './db/push-notifications/subscribers'
 import { create as createPublishersDB } from './db/push-notifications/publishers'
-import { createStore as createS3KeyValueStore } from './infra/aws/s3-kv'
+// import { createStore as createS3KeyValueStore } from './infra/aws/s3-kv'
 import { createClient as createDBClient } from './infra/aws/db'
 import { createPubSub } from './infra/aws/sns/pub-sub'
 import { genTopicArn, parsePublisherTopicArn, genPublisherTopicName } from './infra/aws/sns/topic-arn'
-import { targetLocalstack } from './infra/aws/target-localstack'
 import { createPushNotifier } from './infra/push-notifications'
 import { createStore as createLogStore } from './db/user-logs/log-store'
 import { createTableDefinition } from './config/aws/table-definition'
@@ -50,14 +51,13 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
     logger
   })
 
-  const s3 = clients.s3()
-  const kvStoreLogs = createS3KeyValueStore({
-    client: s3,
-    prefix: s3UserLogsPrefix,
-    defaultPutOpts: {
-      ContentType: 'text'
-    }
-  })
+  const s3Client = createS3Client({ client: clients.s3() })
+  const parsedUserLogsPath = parseS3Path(s3UserLogsPrefix)
+  const kvStoreLogs = wrapBucket({
+    client: s3Client,
+    bucket: parsedUserLogsPath.bucket,
+    prefix: parsedUserLogsPath.key
+  }).kvWithGzip()
 
   const pubSub = createPubSub({
     sns: createSNSClient({ clients })
@@ -72,13 +72,10 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
       name: genPublisherTopicName(opts)
     })
 
-  const s3ConfBucket = createS3KeyValueStore({
-    client: s3,
-    prefix: config.s3PushConfBucket,
-    defaultPutOpts: {
-      ContentType: 'application/json'
-    }
-  })
+  const s3ConfBucket = wrapBucket({
+    client: s3Client,
+    bucket: config.s3PushConfBucket
+  }).jsonKV()
 
   // TODO: declare each function's deps more explicitly
   let pushNotifierPromise

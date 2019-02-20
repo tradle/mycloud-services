@@ -1,15 +1,21 @@
 import path from 'path'
 import { createClientFactory } from '@tradle/aws-client-factory'
+import { createClient as createS3Client, wrapBucket } from '@tradle/aws-s3-client'
+import { targetLocalstack } from '@tradle/aws-common-utils'
 import { genPNSConfig } from '../../config/gen-pns-config'
 import { PusherOpts, Config } from '../../types'
-import { createStore } from '../../infra/aws/s3-kv'
 import { createConfigFromEnv } from '../../config'
-import { targetLocalstack } from '../../infra/aws/target-localstack'
 import { createLogger } from '../../utils/logger'
 import { load as loadEnv } from '../../config/load-env'
 
 const { PROJECT_ROOT } = loadEnv()
-const APN_CERTS_DIR = path.resolve(PROJECT_ROOT, 'certs/apn')
+// const APN_CERTS_DIR = path.resolve(PROJECT_ROOT, 'certs/apn')
+
+const { APN_CERT_PATH, APN_KEY_PATH, FCM_KEY } = process.env
+
+if (!((APN_CERT_PATH && APN_KEY_PATH) || FCM_KEY)) {
+  throw new Error('expected APN_CERT_PATH, APN_KEY_PATH, FCM_KEY environment vars')
+}
 
 interface GenAndPushOpts extends PusherOpts {
   config: Config
@@ -26,10 +32,10 @@ const genAndPush = async ({ config, pushConf }: GenAndPushOpts) => {
   }
 
   const conf = genPNSConfig(pushConf)
-  const kv = createStore({
-    client: clients.s3(),
-    prefix: config.s3PushConfBucket
-  })
+  const kv = wrapBucket({
+    client: createS3Client({ client: clients.s3() }),
+    bucket: config.s3PushConfBucket
+  }).jsonKV()
 
   await kv.put(config.s3PushConfKey, conf)
 }
@@ -40,13 +46,14 @@ genAndPush({
   config: createConfigFromEnv(),
   pushConf: {
     production: false,
-    apn: {
-      appId: 'io.tradle.dev.tim',
-      cert: path.resolve(APN_CERTS_DIR, 'cert.pem'),
-      key: path.resolve(APN_CERTS_DIR, 'key.pem')
-    },
-    gcm: {
-      apiKey: 'gcmKey'
+    apn: APN_CERT_PATH &&
+      APN_KEY_PATH && {
+        appId: 'io.tradle.dev.tim',
+        cert: path.resolve(process.cwd(), APN_CERT_PATH),
+        key: path.resolve(process.cwd(), APN_KEY_PATH)
+      },
+    gcm: FCM_KEY && {
+      apiKey: FCM_KEY
     }
   }
 }).catch(err => {

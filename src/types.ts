@@ -255,7 +255,7 @@ export const VerifyChallengeResponseOptsV = t.intersection([
 export type VerifyChallengeResponseOpts = t.TypeOf<typeof VerifyChallengeResponseOptsV>
 
 export const NotifyOptsV = t.intersection([
-  t.strict({
+  t.type({
     publisher: t.string,
     subscriber: t.string
   }),

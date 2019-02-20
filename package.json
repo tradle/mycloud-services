@@ -18,12 +18,17 @@
     "git:ensureclean": "[[ -z $(git status --porcelain) ]] || (echo 'git working directory is dirty!' && false)",
     "fn": "./src/scripts/fn.sh $@",
     "fn:debug": "DEBUG=1 ./src/scripts/fn.sh $@",
-    "fn:debug-brk": "DEBUG_BRK=1 ./src/scripts/fn.sh $@"
+    "fn:debug-brk": "DEBUG_BRK=1 ./src/scripts/fn.sh $@",
+    "invoke:local:registerDevice": "cat fixtures/register-device.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerDevice",
+    "invoke:local:subscribe": "cat fixtures/subscribe.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f subscribe",
+    "invoke:local:notify": "cat fixtures/notify.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f notify",
+    "invoke:local:notify:brk": "cat fixtures/notify.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f notify"
   },
   "dependencies": {
     "@tradle/aws-client-factory": "~1.0.1-alpha.10",
     "@tradle/aws-common-utils": "~1.0.1-alpha.10",
     "@tradle/aws-sns-client": "~1.0.1-alpha.10",
+    "@tradle/aws-s3-client": "~1.0.1-alpha.10",
     "@tradle/build-resource": "~4.0.2",
     "@tradle/dynamodb": "github:tradle/dynamodb",
     "@tradle/engine": "~8.1.0",

@@ -34,7 +34,7 @@ export const createRouter = ({ config, containerMiddleware }: RouterOpts) => {
   router.post('/pns/subscription', loadMiddleware('subscribe'))
   router.post('/pns/clearbadge', loadMiddleware('clear-badge'))
   router.post('/pns/publisher', loadMiddleware('register-publisher'))
-  router.post('/pns/notification', loadMiddleware('notify'))
+  // router.post('/pns/notification', loadMiddleware('notify'))
   router.post('/logs/userlog', loadMiddleware('save-user-log'))
 
   koa.use(router.routes())

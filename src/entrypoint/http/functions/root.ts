@@ -11,4 +11,4 @@ const router = createRouter(container)
 //   router.listen(config.port)
 // }
 
-export const handler = serverlessHttp(router)
+export const handler = serverlessHttp(router as any)

@@ -92,28 +92,24 @@ functions:
 
   # # PUBLISHER-PRIVATE API
 
-  # notify:
-  #   handler: lib/entrypoint/http/functions/root.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: pns/notification
+  notify:
+    handler: lib/entrypoint/sns/functions/notify.handler
 
   # # PUBLIC API (for subscribers)
 
-  # registerDevice:
-  #   handler: lib/entrypoint/http/functions/root.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: pns/subscriber
+  registerDevice:
+    handler: lib/entrypoint/http/functions/root.handler
+    events:
+      - http:
+          method: post
+          path: pns/subscriber
 
-  # subscribe:
-  #   handler: lib/entrypoint/http/functions/root.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: pns/subscription
+  subscribe:
+    handler: lib/entrypoint/http/functions/root.handler
+    events:
+      - http:
+          method: post
+          path: pns/subscription
 
   # clearBadge:
   #   handler: lib/entrypoint/http/functions/root.handler

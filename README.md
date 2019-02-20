@@ -31,6 +31,17 @@ MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
 `.env` should reference resources in AWS
 `.env.offline` should reference resources in [localstack](https://github.com/localstack/localstack). If you have a MyCloud development environment set up, you should have the relevant S3 buckets and DynamoDB table there
 
+### Local
+
+Save your configuration to S3:
+
+```sh
+# localstack
+APN_CERT_PATH=./certs/apns/cert.pem APN_KEY_PATH=./certs/apns/key.pem FCM_KEY=your-fcm-or-gcm-key npm run pushconf:local
+# remote
+APN_CERT_PATH=./certs/apns/cert.pem APN_KEY_PATH=./certs/apns/key.pem FCM_KEY=your-fcm-or-gcm-key npm run pushconf
+```
+
 ## Folder Structure
 
 Roughly approximates the "Clean Architecture" by "Uncle Bob"

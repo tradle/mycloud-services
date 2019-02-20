@@ -96,7 +96,7 @@ export const unserializeDevice = (serialized: string) => {
   }
 }
 
-const reencodeString = (str: string, from: HexBase64BinaryEncoding, to: HexBase64BinaryEncoding) =>
+const reEncodeString = (str: string, from: HexBase64BinaryEncoding, to: HexBase64BinaryEncoding) =>
   new Buffer(str, from).toString(to)
-const hexToBase64 = (str: string) => reencodeString(str, 'hex', 'base64')
-const base64ToHex = (str: string) => reencodeString(str, 'base64', 'hex')
+const hexToBase64 = (str: string) => reEncodeString(str, 'hex', 'base64')
+const base64ToHex = (str: string) => reEncodeString(str, 'base64', 'hex')
