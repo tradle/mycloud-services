@@ -2,7 +2,6 @@ import tradle from '@tradle/protocol'
 import { Errors } from '@tradle/aws-common-utils'
 import {
   SubscribersDB,
-  GetSubcriptionOpts,
   Subscriber,
   Subscription,
   RegisterDeviceOpts,
@@ -10,9 +9,7 @@ import {
   AddSubscriberDeviceOptsV,
   ClearBadgeOpts,
   SubscribersOpts,
-  Device,
-  CreateSubscriptionOpts,
-  SignedTradleObject
+  CreateSubscriptionOpts
 } from '../../types'
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from '../../constants'
@@ -77,21 +74,14 @@ export class Subscribers {
       }
     }
 
-    if (!sub.devices) sub.devices = []
-
-    const device: Device = { token, protocol }
-    const { devices } = sub
-    if (!devices.includes(device)) {
-      devices.push(device)
+    const { devices = [] } = sub
+    if (!devices.includes(token)) {
+      devices.push(token)
     }
 
     await this.db.updateSubscriber({ ...sub, devices })
   }
 
-  // public validateAuthor = (object: SignedTradleObject) => {
-  //    const { _author } = object
-  //    await this.
-  // }
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
     const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
     await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
@@ -101,16 +91,16 @@ export class Subscribers {
     throw new Errors.NotImplemented('implement me!')
   }
 
-  public getSubscription = async (opts: GetSubcriptionOpts) => {
-    return await this.db.getSubscription(opts)
-  }
+  // public getSubscription = async (opts: GetSubcriptionOpts) => {
+  //   return await this.db.getSubscription(opts)
+  // }
 
-  public get updateSubscription() {
-    return this.db.updateSubscription
-  }
-  public get incSubscriberUnreadCount() {
-    return this.db.incSubscriberUnreadCount
-  }
+  // public get updateSubscription() {
+  //   return this.db.updateSubscription
+  // }
+  // public get incSubscriberUnreadCount() {
+  //   return this.db.incSubscriberUnreadCount
+  // }
 
   public get getSubscriber() {
     return this.db.getSubscriber

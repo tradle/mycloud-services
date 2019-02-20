@@ -4,6 +4,10 @@ class InvalidSignature extends Errors.UserError {
   public type = 'InvalidSignature'
 }
 
+class Forbidden extends Errors.UserError {
+  public type = 'Forbidden'
+}
+
 class NotImplemented extends Error {
   public type = 'NotImplemented'
 }
@@ -16,5 +20,6 @@ export = {
   ...Errors,
   InvalidSignature,
   NotImplemented,
-  Unsupported
+  Unsupported,
+  Forbidden
 }

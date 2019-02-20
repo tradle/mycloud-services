@@ -168,17 +168,18 @@ export type Identity = t.TypeOf<typeof IdentityV>
 
 // Subscribers
 
-export interface GetSubcriptionOpts {
-  publisher: string
-  subscriber: string
-}
+// export interface GetSubcriptionOpts {
+//   publisher: string
+//   subscriber: string
+// }
 
-export interface Subscription extends UnsignedTradleObject {
-  publisher: string
-  subscriber: string
-  deviceTokens: string[]
-  seq: number
-}
+// export interface Subscription extends UnsignedTradleObject {
+//   publisher: string
+//   subscriber: string
+//   deviceTokens: string[]
+//   seq: number
+// }
+
 export interface SubscribersOpts {
   subscribersDB: SubscribersDB
 }

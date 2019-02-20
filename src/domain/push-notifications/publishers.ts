@@ -10,6 +10,7 @@ import {
   PushNotifier
 } from '../../types'
 import * as assert from '../../utils/assert'
+import Errors from '../../errors'
 import { Subscribers } from './subscribers'
 
 export interface PublishersOpts {
@@ -70,35 +71,22 @@ export class Publishers {
     await Promise.all(tasks)
   }
 
-  // public isRegistered = async (opts: RegisterPublisherOpts) => {
-  //   return await this.opts.publishersDB.publisherExists(opts)
-  // }
-
   public notify = async (opts: NotifyOpts) => {
     assert.isTypeOf(opts, NotifyOptsV)
     const { publishersDB, subscribers, pushNotifier } = this.opts
-    const { publisher, subscriber } = opts
-    const [subscription, publisherName] = await Promise.all([
-      subscribers.getSubscription({ subscriber, publisher }),
-      publishersDB.getPublisherName(publisher)
+    const [subscriber, publisherName] = await Promise.all([
+      subscribers.getSubscriber({ permalink: opts.subscriber }),
+      publishersDB.getPublisherName(opts.publisher)
     ])
 
-    const { deviceTokens } = subscription
+    const { devices, subscriptions = [] } = subscriber
+    if (!subscriptions.includes(opts.publisher)) {
+      throw new Errors.Forbidden('subscriber is not subscribed')
+    }
+
     const title = createPushMessage(publisherName)
-    await pushNotifier.notify({ deviceTokens, title, badge: BADGES.ONE })
-    const updateSubscription = subscribers.updateSubscription({
-      ...subscription,
-      seq: (subscription.seq || 0) + 1
-    })
-
-    const updateSubscriber = subscribers.incSubscriberUnreadCount(subscriber)
-    await Promise.all([updateSubscription, updateSubscriber])
+    await pushNotifier.notify({ deviceTokens: devices, title, badge: BADGES.ONE })
   }
-
-  // private hasPublisherTopic = async (opts: RegisterPublisherOpts) => {
-  //   const { pubSub, createPublisherTopicName } = this.opts
-  //   return await pubSub.hasTopic(createPublisherTopicName(opts))
-  // }
 }
 
 export const create = (ctx: PublishersOpts) => new Publishers(ctx)

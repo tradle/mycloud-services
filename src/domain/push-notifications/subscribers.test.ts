@@ -7,20 +7,20 @@ import { create as createSubscribers } from './subscribers'
 import { SubscribersDB, Subscriber, Subscription, Device, SignedDevice } from '../../types'
 import subscriberIdentity from '../../../fixtures/identity'
 import * as constants from '../../constants'
-import { serializeDevice, unserializeDevice } from '../../db/push-notifications/subscribers'
+// import { serializeDevice, unserializeDevice } from '../../db/push-notifications/subscribers'
 
-test('un/serialize device', t => {
-  const device: Device = {
-    protocol: 'apns',
-    token: 'abc'
-  }
+// test('un/serialize device', t => {
+//   const device: Device = {
+//     protocol: 'apns',
+//     token: 'abc'
+//   }
 
-  const deviceStr = serializeDevice(device)
-  t.equal(deviceStr, 'apns:abc')
-  t.deepEqual(unserializeDevice(deviceStr), device)
+//   const deviceStr = serializeDevice(device)
+//   t.equal(deviceStr, 'apns:abc')
+//   t.deepEqual(unserializeDevice(deviceStr), device)
 
-  t.end()
-})
+//   t.end()
+// })
 
 // f u Prettier!
 test(
