@@ -47,6 +47,7 @@ export class Subscribers {
   constructor({ subscribersDB: subscriberDB }: SubscribersOpts) {
     this.db = subscriberDB
   }
+
   public registerDevice = async ({ device }: RegisterDeviceOpts) => {
     const { identity, token, protocol } = device
     // add device token for subscriber permalink
@@ -75,8 +76,8 @@ export class Subscribers {
     }
 
     const { devices = [] } = sub
-    if (!devices.includes(token)) {
-      devices.push(token)
+    if (!devices.find(d => d.token === token)) {
+      devices.push({ protocol, token })
     }
 
     await this.db.updateSubscriber({ ...sub, devices })

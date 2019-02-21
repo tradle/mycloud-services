@@ -81,14 +81,14 @@ package:
 functions:
   # PRIVATE API
 
-  # registerPublisher:
-  #   handler: lib/entrypoint/http/functions/root.handler
-  #   events:
-  #     - http:
-  #         method: post
-  #         path: pns/publisher
-  #         # requires api key to access
-  #         private: true
+  registerPublisher:
+    handler: lib/entrypoint/http/functions/root.handler
+    events:
+      - http:
+          method: post
+          path: pns/publisher
+          # requires api key to access
+          private: true
 
   # # PUBLISHER-PRIVATE API
 

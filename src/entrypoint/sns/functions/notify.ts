@@ -8,5 +8,10 @@ const publisherPromise = container.ready.then(() => new Publishers(container))
 
 export const handler: SNSHandler = async event => {
   const publishers = await publisherPromise
-  await publishers.notify(parseEvent({ event, container }))
+  try {
+    await publishers.notify(parseEvent({ event, container }))
+  } catch (err) {
+    const { message, ...rest } = err
+    container.logger.error({ message: `failed to notify subscriber: ${message}`, ...rest })
+  }
 }

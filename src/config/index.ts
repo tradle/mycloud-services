@@ -21,6 +21,7 @@ export const createConfig = (env: any) => {
   if (local) {
     env = {
       ...env,
+      ACCOUNT_ID: '123456789012', // localstack
       NOTIFY_LAMBDA_FUNCTION: 'mycloud-services-offline-notify-lambda',
       // otherwise we get Ref objects from serverless.yml
       ...ENV

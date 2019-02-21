@@ -85,7 +85,11 @@ export class Publishers {
     }
 
     const title = createPushMessage(publisherName)
-    await pushNotifier.notify({ deviceTokens: devices, title, badge: BADGES.ONE })
+    await pushNotifier.notify({
+      deviceTokens: devices.map(d => d.token),
+      title,
+      badge: BADGES.ONE
+    })
   }
 }
 

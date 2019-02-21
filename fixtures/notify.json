@@ -13,7 +13,7 @@
         "Message": "{\"seq\":0,\"subscriber\":\"694554acd47acfba99961a63938a49a29a19193d8f8574f2685245c16ea769bd\"}",
         "Type": "Notification",
         "UnsubscribeUrl": "EXAMPLE",
-        "TopicArn": "arn:aws:sns:us-west-2:1111111111:2222222222-a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2",
+        "TopicArn": "arn:aws:sns:us-west-2:123456789012:2222222222-a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2",
         "Subject": "TestInvoke"
       }
     }

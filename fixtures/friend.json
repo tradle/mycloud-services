@@ -1,0 +1,31 @@
+{
+  "__h__": "tradle.MyCloudFriend{8d0a7a6c8caee6335ef4ac9142f263d8d58eb50ccc3d61c7fa6fc288fbe98967}",
+  "__r__": "_",
+  "__x0h__": "tradle.MyCloudFriend{tradle.io}",
+  "__x0r__": "{1528465517853}",
+  "__x1h__": "tradle.MyCloudFriend{a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2}",
+  "__x1r__": "{1528465517853}",
+  "__x2h__": "tradle.MyCloudFriend{tradle.MyCloudFriend}",
+  "__x2r__": "{1528465517853}",
+  "_author": "569a4dc1fc69f6137dede81ca0ff77c1a5feb0f4a7bdc73e0007f5ed3a1d1f60",
+  "_link": "8d0a7a6c8caee6335ef4ac9142f263d8d58eb50ccc3d61c7fa6fc288fbe98967",
+  "_permalink": "8d0a7a6c8caee6335ef4ac9142f263d8d58eb50ccc3d61c7fa6fc288fbe98967",
+  "_s": "CkkKBHAyNTYSQQSV2HP3LcqOHRW7JCfO/dQAwZ/T62Ga2BVrKbbD8Ta5I3WNq9RaQy0ZpGZzTFMcsTX6qrBIiL+9mCnQ5HlSuQBUEkcwRQIhALARZ5IYdhfHBmcK2fnWkmQXb4tpsn/mNTtyNWGvyh+nAiBRP1NH7G/SWIhXJz0r+dJVF/y787NQwBtbrvJuIIeNmw==",
+  "_sigPubKey": "0495d873f72dca8e1d15bb2427cefdd400c19fd3eb619ad8156b29b6c3f136b923758dabd45a432d19a466734c531cb135faaab04888bfbd9829d0e47952b90054",
+  "_t": "tradle.MyCloudFriend",
+  "_time": 1528465517853,
+  "domain": "tradle.io",
+  "identity": {
+    "_link": "a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2",
+    "_permalink": "a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2",
+    "_t": "tradle.Identity"
+  },
+  "name": "Tradle",
+  "org": {
+    "_displayName": "Tradle",
+    "_link": "e50c61be5e8029316a2d3c7ee91e13e7f9e948f26d555766e4b2f9aff0c3f0b8",
+    "_permalink": "e50c61be5e8029316a2d3c7ee91e13e7f9e948f26d555766e4b2f9aff0c3f0b8",
+    "_t": "tradle.Organization"
+  },
+  "url": "https://t22ju1ga5c.execute-api.us-east-1.amazonaws.com/dev"
+}

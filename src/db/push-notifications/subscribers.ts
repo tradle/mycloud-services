@@ -1,12 +1,4 @@
-import {
-  DBHandle,
-  GetSubcriptionOpts,
-  Subscription,
-  Identity,
-  Subscriber,
-  SerializedSubscriber,
-  Device
-} from '../../types'
+import { DBHandle, Subscriber, SerializedSubscriber, Device } from '../../types'
 import { TYPES } from '../../constants'
 import { HexBase64BinaryEncoding } from 'crypto'
 
@@ -29,22 +21,22 @@ export class Subscribers {
 
   // public createSubscriber = async (opts: CreateSubscriberOpts) => this.put(TYPES.SUBSCRIBER, opts)
 
-  public createSubscription = async (opts: CreateSubscriptionOpts) => this.put(TYPES.SUBSCRIPTION, opts)
+  // public createSubscription = async (opts: CreateSubscriptionOpts) => this.put(TYPES.SUBSCRIPTION, opts)
 
   public getSubscriber = async ({ permalink }: GetSubscriberOpts) =>
     this.db.matchOne(TYPES.SUBSCRIBER, { permalink }) as Promise<Subscriber>
-  public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
-    this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
+  // public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
+  //   this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
 
   public updateSubscriber = async (sub: Subscriber) => this.update(TYPES.SUBSCRIBER, sub)
 
   // use put() because subscription is signed
-  public updateSubscription = (sub: Subscription) => this.put(TYPES.SUBSCRIPTION, sub)
-  public incSubscriberUnreadCount = async (permalink: string) => {
-    const subscriber = await this.db.matchOne(TYPES.SUBSCRIBER, { permalink })
-    const unreadCount = (subscriber.unreadCount || 0) + 1
-    await this.update(TYPES.SUBSCRIBER, { subscriber, unreadCount })
-  }
+  // public updateSubscription = (sub: Subscription) => this.put(TYPES.SUBSCRIPTION, sub)
+  // public incSubscriberUnreadCount = async (permalink: string) => {
+  //   const subscriber = await this.db.matchOne(TYPES.SUBSCRIBER, { permalink })
+  //   const unreadCount = (subscriber.unreadCount || 0) + 1
+  //   await this.update(TYPES.SUBSCRIBER, { subscriber, unreadCount })
+  // }
 
   private put = async (type: string, resource: any): Promise<void> => {
     await this.db.put({ _t: type, ...resource })
