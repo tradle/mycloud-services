@@ -1,4 +1,5 @@
 import path from 'path'
+import AWS from 'aws-sdk'
 import { createClientFactory } from '@tradle/aws-client-factory'
 import { createClient as createS3Client, wrapBucket } from '@tradle/aws-s3-client'
 import { targetLocalstack } from '@tradle/aws-common-utils'
@@ -6,9 +7,9 @@ import { genPNSConfig } from '../../config/gen-pns-config'
 import { PusherOpts, Config } from '../../types'
 import { createConfigFromEnv } from '../../config'
 import { createLogger } from '../../utils/logger'
-import { load as loadEnv } from '../../config/load-env'
+// import { load as loadEnv } from '../../config/load-env'
 
-const { PROJECT_ROOT } = loadEnv()
+// const { PROJECT_ROOT } = loadEnv()
 // const APN_CERTS_DIR = path.resolve(PROJECT_ROOT, 'certs/apn')
 
 const { APN_CERT_PATH, APN_KEY_PATH, FCM_KEY } = process.env
@@ -24,11 +25,12 @@ interface GenAndPushOpts extends PusherOpts {
 
 const genAndPush = async ({ config, pushConf }: GenAndPushOpts) => {
   const clients = createClientFactory({
+    AWS,
     defaults: { region: config.region }
   })
 
   if (config.local) {
-    targetLocalstack()
+    targetLocalstack(AWS)
   }
 
   const conf = genPNSConfig(pushConf)

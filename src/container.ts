@@ -1,5 +1,6 @@
 import promiseProps from 'p-props'
 import omit from 'lodash/omit'
+import AWS from 'aws-sdk'
 import { createClient as createSNSClient } from '@tradle/aws-sns-client'
 import { createClientFactory } from '@tradle/aws-client-factory'
 import { parseS3Path, targetLocalstack } from '@tradle/aws-common-utils'
@@ -25,10 +26,11 @@ import { FUNCTIONS } from './constants'
 export const createContainer = (config: Config = createConfigFromEnv()): Container => {
   const { local, region, s3UserLogsPrefix, myCloudTableName, logLevel } = config
   if (local) {
-    targetLocalstack()
+    targetLocalstack(AWS)
   }
 
   const clients = createClientFactory({
+    AWS,
     defaults: { region },
     useGlobalConfigClock: true
   })

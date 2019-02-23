@@ -15,7 +15,7 @@ const AWS = require('aws-sdk')
 const { targetLocalstack } = require('@tradle/aws-common-utils')
 const friend = require('../../fixtures/friend.json')
 
-targetLocalstack()
+targetLocalstack(AWS)
 
 const dynamodb = new AWS.DynamoDB.DocumentClient()
 dynamodb
