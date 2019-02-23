@@ -35,7 +35,7 @@ export interface PublishersOpts {
 
 // export const genChallengeForPublisher = () => crypto.genNonce(32, 'base64')
 
-export const createPushMessage = (name: string) => `You have unread messages from "${name}"`
+export const createPushMessage = (name: string) => `You have unread messages from: ${name}`
 
 // for now, always show one, later we'll count
 const BADGES = {
@@ -87,7 +87,8 @@ export class Publishers {
     const title = createPushMessage(publisherName)
     await pushNotifier.notify({
       deviceTokens: devices.map(d => d.token),
-      title,
+      // title,
+      body: title,
       badge: BADGES.ONE
     })
   }

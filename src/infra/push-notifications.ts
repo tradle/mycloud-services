@@ -27,12 +27,14 @@ export class Pusher implements PushNotifier {
 
   public notify = async (opts: PushNotifierNotifyOpts): Promise<PNResult> => {
     const data: PN.Data = this.createPushData(opts)
+    // created per notification to avoid maintaining a connection,
+    // which hits issues when in AWS Lambda
     const send = createSend(this.opts)
     const result = await send(opts.deviceTokens, data)
     return (result as unknown) as PNResult
   }
 
-  private createPushData = ({ title = '', body = '', deviceTokens, badge }: PushNotifierNotifyOpts) => {
+  private createPushData = ({ title = '', body = '', badge }: PushNotifierNotifyOpts) => {
     return pickNonNull({
       title,
       body,

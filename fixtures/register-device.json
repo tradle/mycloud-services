@@ -116,7 +116,7 @@
       "_time": 1549572575478
     },
     "token": "eg0bcGSwqbo:APA91bFc1lGMt4wk9cVJzpoB_fScPGNkQ8E83mmv8axdk-JOdixN1TmG7v-LOxOXUnqzIsSFGynzRhE4j6kFsN-eLPO7zhSBD6W2R0777-Re0BfDb9yqmlxCrv9sqoG8TsoFucA1zM7C",
-    "protocol": "apn",
+    "protocol": "gcm",
     "_author": "694554acd47acfba99961a63938a49a29a19193d8f8574f2685245c16ea769bd",
     "_pv": "5.0.1",
     "_time": 1549572598290

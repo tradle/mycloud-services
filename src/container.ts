@@ -83,7 +83,7 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
   let pushNotifierPromise
   let logStore: LogStore
   let userLogs: UserLogs
-  if (isFunction(config.functionName, FUNCTIONS.saveUserLog)) {
+  if (config.functionName && isFunction(config.functionName, FUNCTIONS.saveUserLog)) {
     pushNotifierPromise = Promise.resolve(null)
     logStore = createLogStore(kvStoreLogs)
     userLogs = createUserLogs({ store: logStore })

@@ -24,6 +24,7 @@
     "invoke:local:registerPublisher": "cat fixtures/register-publisher.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerPublisher",
     "invoke:local:registerPublisher:brk": "cat fixtures/register-publisher.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f registerPublisher",
     "invoke:local:registerDevice": "cat fixtures/register-device.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerDevice",
+    "invoke:local:registerDevice:brk": "cat fixtures/register-device.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f registerDevice",
     "invoke:local:subscribe": "cat fixtures/subscribe.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f subscribe",
     "invoke:local:notify": "cat fixtures/notify.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f notify",
     "invoke:local:notify:brk": "cat fixtures/notify.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f notify"

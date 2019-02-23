@@ -71,6 +71,7 @@ custom:
   vars: ${file(./lib/config/index.js):createConfigFromEnv}
   serverless-offline:
     port: 31013
+    noAuth: true
 
 package:
   exclude: # Specify the directories and files which should be excluded in the deployment package
