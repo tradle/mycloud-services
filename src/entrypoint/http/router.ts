@@ -21,16 +21,24 @@ export const createRouter = ({ config, containerMiddleware }: RouterOpts) => {
   //   router.use(loadMiddleware('logger'))
   // }
 
-  router
-    .use(cors())
-    .use(
-      bodyParser({
-        enableTypes: ['json', 'text']
-      })
-    )
-    .use(compression())
+  router.use(cors())
+  router.use(
+    bodyParser({
+      enableTypes: ['json', 'text']
+    })
+  )
 
+  router.use(compression())
   router.use(containerMiddleware)
+  router.use(async (ctx, next) => {
+    ctx.container.logger.debug({
+      action: 'receive-request',
+      path: ctx.request.url
+    })
+
+    await next()
+  })
+
   router.use(loadMiddleware('error'))
   router.post('/pns/subscriber', loadMiddleware('register-device'))
   router.post('/pns/subscription', loadMiddleware('subscribe'))

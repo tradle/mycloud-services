@@ -33,6 +33,7 @@
   "dependencies": {
     "@tradle/aws-client-factory": "~1.0.1-alpha.11",
     "@tradle/aws-common-utils": "~1.0.1-alpha.11",
+    "@tradle/aws-lambda-client": "~1.0.1-alpha.11",
     "@tradle/aws-s3-client": "~1.0.1-alpha.11",
     "@tradle/aws-sns-client": "~1.0.1-alpha.11",
     "@tradle/build-resource": "~4.0.2",

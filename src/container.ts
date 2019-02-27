@@ -2,6 +2,7 @@ import promiseProps from 'p-props'
 import omit from 'lodash/omit'
 import AWS from 'aws-sdk'
 import { createClient as createSNSClient } from '@tradle/aws-sns-client'
+import { createClient as createLambdaClient } from '@tradle/aws-lambda-client'
 import { createClientFactory } from '@tradle/aws-client-factory'
 import { parseS3Path, targetLocalstack } from '@tradle/aws-common-utils'
 import { wrapBucket, createClient as createS3Client } from '@tradle/aws-s3-client'
@@ -62,7 +63,9 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
   }).kvWithGzip()
 
   const pubSub = createPubSub({
-    sns: createSNSClient({ clients })
+    logger,
+    sns: createSNSClient({ clients }),
+    lambda: createLambdaClient({ client: clients.lambda() })
   })
 
   const createPublisherTopicName = (opts: RegisterPublisherOpts) =>

@@ -52,20 +52,19 @@ export class Publishers {
   public register = async (opts: RegisterPublisherOpts) => {
     assert.isTypeOf(opts, RegisterPublisherOptsV)
 
-    const { pubSub, createPublisherTopicName, notificationsTarget } = this.opts
+    const { pubSub, createPublisherTopicName, notificationsTarget, logger } = this.opts
     const topic = createPublisherTopicName(opts)
     if (pubSub.createTopic) {
       await pubSub.createTopic(topic)
+      logger.debug({
+        action: 'create-topic',
+        topic,
+        publisherAccount: opts.accountId
+      })
     }
 
     const tasks = []
     if (pubSub.allowPublish) {
-      this.opts.logger.debug({
-        action: 'allow-publish',
-        topic,
-        publisherAccount: opts.accountId
-      })
-
       const allowPublish = pubSub.allowPublish({ topic, publisherId: opts.accountId })
       tasks.push(allowPublish)
     }
@@ -77,7 +76,7 @@ export class Publishers {
 
     tasks.push(subscribe)
     await Promise.all(tasks)
-    this.opts.logger.debug({
+    logger.debug({
       action: 'register-publisher',
       publisher: opts.permalink
     })

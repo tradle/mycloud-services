@@ -1,29 +1,58 @@
-import { PubSub } from '../../../types'
 import { SNSClient, parseTopicArn } from '@tradle/aws-sns-client'
+import { LambdaClient } from '@tradle/aws-lambda-client'
+import { parseArn } from '@tradle/aws-common-utils'
+import { PubSub, Logger } from '../../../types'
 
 interface SNSPubSubOpts {
   sns: SNSClient
+  lambda: LambdaClient
+  logger: Logger
 }
 
 export class SNSPubSub implements PubSub {
-  private sns: SNSClient
-  constructor({ sns }: SNSPubSubOpts) {
-    this.sns = sns
-  }
+  constructor(private opts: SNSPubSubOpts) {}
 
   public get publish() {
-    return this.sns.publish.bind(this.sns)
+    return this.opts.sns.publish.bind(this.opts.sns)
   }
-  public get subscribe() {
-    return this.sns.subscribeIfNotSubscribed.bind(this.sns)
+  public subscribe = async ({ topic, target }) => {
+    const tasks = []
+    tasks.push(this.opts.sns.subscribeIfNotSubscribed({ topic, target }))
+    tasks.push(this.opts.lambda.allowSNSToInvoke(target))
+
+    await Promise.all(tasks)
+
+    this.opts.logger.debug({
+      action: 'sns-subscribe',
+      topic,
+      target
+    })
   }
   public createTopic = async (arn: string) => {
     const { name, region } = parseTopicArn(arn)
-    await this.sns.createTopic({ name, region })
+    await this.opts.sns.createTopic({ name, region })
+    this.opts.logger.debug({
+      action: 'create-topic',
+      topic: arn
+    })
   }
 
   public allowPublish = async ({ topic, publisherId }) => {
-    await this.sns.allowCrossAccountPublish(topic, [publisherId])
+    if (parseArn(topic).accountId !== publisherId) {
+      await this.opts.sns.allowCrossAccountPublish(topic, [publisherId])
+      this.opts.logger.debug({
+        action: 'allow-cross-account-publish',
+        topic,
+        publisherId
+      })
+
+      return
+    }
+
+    this.opts.logger.debug({
+      action: 'skip-allow-publish',
+      reason: 'publisher and subscriber are the same account'
+    })
   }
 }
 
