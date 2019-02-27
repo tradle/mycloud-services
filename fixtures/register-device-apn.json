@@ -1,0 +1,125 @@
+{
+  "resource": "/",
+  "path": "/pns/subscriber",
+  "httpMethod": "POST",
+  "headers": {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Accept-Language": "en-GB,en-US;q=0.8,en;q=0.6,zh-CN;q=0.4",
+    "cache-control": "max-age=0",
+    "CloudFront-Forwarded-Proto": "https",
+    "CloudFront-Is-Desktop-Viewer": "true",
+    "CloudFront-Is-Mobile-Viewer": "false",
+    "CloudFront-Is-SmartTV-Viewer": "false",
+    "CloudFront-Is-Tablet-Viewer": "false",
+    "CloudFront-Viewer-Country": "GB",
+    "content-type": "application/json",
+    "Host": "j3ap25j034.execute-api.eu-west-2.amazonaws.com",
+    "origin": "https://j3ap25j034.execute-api.eu-west-2.amazonaws.com",
+    "Referer": "https://j3ap25j034.execute-api.eu-west-2.amazonaws.com/dev/",
+    "upgrade-insecure-requests": "1",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
+    "Via": "2.0 a3650115c5e21e2b5d133ce84464bea3.cloudfront.net (CloudFront)",
+    "X-Amz-Cf-Id": "0nDeiXnReyHYCkv8cc150MWCFCLFPbJoTs1mexDuKe2WJwK5ANgv2A==",
+    "X-Amzn-Trace-Id": "Root=1-597079de-75fec8453f6fd4812414a4cd",
+    "X-Forwarded-For": "50.129.117.14, 50.112.234.94",
+    "X-Forwarded-Port": "443",
+    "X-Forwarded-Proto": "https"
+  },
+  "queryStringParameters": null,
+  "pathParameters": null,
+  "stageVariables": null,
+  "requestContext": {
+    "path": "/dev/",
+    "accountId": "125002137610",
+    "resourceId": "qdolsr1yhk",
+    "stage": "dev",
+    "requestId": "0f2431a2-6d2f-11e7-b75152aa497861",
+    "identity": {
+      "cognitoIdentityPoolId": null,
+      "accountId": null,
+      "cognitoIdentityId": null,
+      "caller": null,
+      "apiKey": "",
+      "sourceIp": "50.129.117.14",
+      "accessKey": null,
+      "cognitoAuthenticationType": null,
+      "cognitoAuthenticationProvider": null,
+      "userArn": null,
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36",
+      "user": null
+    },
+    "resourcePath": "/",
+    "httpMethod": "POST",
+    "apiId": "j3azlsj0c4"
+  },
+  "body": {
+    "_s": "CkkKBHAyNTYSQQT+Z3ExHqG2wMUBl2hpibJq9YUCNTnU73QbT23rAcim45QZpHBL44GCHmoVPuJrso+oifJGYnWMQUJprC6TQvFBEkgwRgIhAPBEsBqqLL4Cywom2g9DAgjZpr04InOC8cD5W4yl6E2pAiEAuAGu8yNQ6tbYq64EJDXVKtrPRev/l9TkJBJNcQfHwf0=",
+    "_t": "tradle.PNSRegistration",
+    "identity": {
+      "_s": "CkkKBHAyNTYSQQTNAqnGMMej3tj90xSL3bTxEYs43xKI7nxKsmIkxoJXxXCJBhRZ/JmRqVQ+jyg2MNTtaht9PbVJM7Rn67OMz6p1EkcwRQIhAO9LEs948lHYfFn7PIzgZ8a1HBvkiBarTDNqycWvWviJAiB3MYfMTclfi8xwy6BpWVgMuWxd3NCgibAtwcovkJgj6w==",
+      "_t": "tradle.Identity",
+      "pubkeys": [
+        {
+          "purpose": "sign",
+          "type": "ec",
+          "curve": "p256",
+          "pub": "04fe6771311ea1b6c0c50197686989b26af585023539d4ef741b4f6deb01c8a6e39419a4704be381821e6a153ee26bb28fa889f24662758c414269ac2e9342f141",
+          "fingerprint": "c6a3eb30152186250b6faf8526afc3331d95acbd0908074593f6ab06d81f8d32"
+        },
+        {
+          "purpose": "update",
+          "type": "ec",
+          "curve": "p256",
+          "pub": "04cd02a9c630c7a3ded8fdd3148bddb4f1118b38df1288ee7c4ab26224c68257c57089061459fc9991a9543e8f283630d4ed6a1b7d3db54933b467ebb38ccfaa75",
+          "fingerprint": "5515786ca59abb8209d826075ab79dc217954e53f69d9913530714060cde20bf"
+        },
+        {
+          "purpose": "tls",
+          "type": "ec",
+          "curve": "curve25519",
+          "pub": "b1afeefe9d4b05d90614a9d04cb1a804a6d922449f0dc7e8f4caa5e3de58b705",
+          "fingerprint": "15ed51e90e8679b53b029dfab7f6f7dc3ee94ece7d087879fcd028c830e85d97"
+        },
+        {
+          "networkName": "testnet",
+          "purpose": "payment",
+          "type": "bitcoin",
+          "fingerprint": "mnzgneZ5hpHC7i48CibUioWpKiyd3ct2C1",
+          "pub": "0296509c3b6de7b518502dcaf7c9dbcea9f6f4d5d4e773d1b9f75c0cbe077a3134"
+        },
+        {
+          "networkName": "testnet",
+          "purpose": "messaging",
+          "type": "bitcoin",
+          "fingerprint": "mtHxTZFZpToyCqKxA9XZSWqHSK5twy7LSv",
+          "pub": "03de55dac099d65a5c75eb45de8c41f1319f25221bd4c8b7160620f0b107a75bfe"
+        },
+        {
+          "purpose": "payment",
+          "type": "ethereum",
+          "curve": "secp256k1",
+          "pub": "045d459d611496a661927ad1aebe20269fa030deae81b8c967f7308030ebbf41292b5820a53ff1c581cab9e7471dd6af515bcca6648ca0e8004701a1467035ebd4",
+          "fingerprint": "b3cca80eec1948627a7c4ed66fbb6f7d2c6adcc9",
+          "networkName": "rinkeby"
+        },
+        {
+          "purpose": "messaging",
+          "type": "ethereum",
+          "curve": "secp256k1",
+          "pub": "04265a86249eeb2c8924b59439dda7250ec9eeab65cceb2d42dc1d0f1ff4403adf6cdb899b7872816b595cbfd28a2aa0f3d92bc597d9de9968c46c96c2589fbb1e",
+          "fingerprint": "4acbc415f32918ba840e53cd22df7f906b1bab39",
+          "networkName": "rinkeby"
+        }
+      ],
+      "_pv": "5.0.1",
+      "_time": 1551201804602
+    },
+    "token": "681d3b05dcc2490a73afc403d4bff5881ce749a90f794c72dc3fb72aa9aba12a",
+    "protocol": "apns",
+    "_author": "47b147b7380387a7fc529ecfe79a1bacbf08a8aa689aeb35ed4aa3d6e98e0191",
+    "_pv": "5.0.1",
+    "_time": 1551291752924
+  },
+  "isBase64Encoded": false
+}

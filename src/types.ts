@@ -182,6 +182,7 @@ export type Identity = t.TypeOf<typeof IdentityV>
 
 export interface SubscribersOpts {
   subscribersDB: SubscribersDB
+  logger: Logger
 }
 
 export const DeviceV = t.type({

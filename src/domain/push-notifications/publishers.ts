@@ -7,7 +7,8 @@ import {
   RegisterPublisherOptsV,
   NotifyOpts,
   NotifyOptsV,
-  PushNotifier
+  PushNotifier,
+  Logger
 } from '../../types'
 import * as assert from '../../utils/assert'
 import Errors from '../../errors'
@@ -21,6 +22,7 @@ export interface PublishersOpts {
   createPublisherTopicName: CreatePublisherTopicName
   pushNotifier: PushNotifier
   notificationsTarget: string
+  logger: Logger
 }
 
 // export const verifyChallengeResponse = async (opts: VerifyChallengeResponseOpts) => {
@@ -58,6 +60,12 @@ export class Publishers {
 
     const tasks = []
     if (pubSub.allowPublish) {
+      this.opts.logger.debug({
+        action: 'allow-publish',
+        topic,
+        publisherAccount: opts.accountId
+      })
+
       const allowPublish = pubSub.allowPublish({ topic, publisherId: opts.accountId })
       tasks.push(allowPublish)
     }
@@ -69,6 +77,10 @@ export class Publishers {
 
     tasks.push(subscribe)
     await Promise.all(tasks)
+    this.opts.logger.debug({
+      action: 'register-publisher',
+      publisher: opts.permalink
+    })
   }
 
   public notify = async (opts: NotifyOpts) => {
@@ -90,6 +102,12 @@ export class Publishers {
       // title,
       body: title,
       badge: BADGES.ONE
+    })
+
+    this.opts.logger.debug({
+      action: 'notify',
+      publisher: opts.publisher,
+      subscriber: opts.subscriber
     })
   }
 }

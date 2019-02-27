@@ -9,7 +9,8 @@ import {
   AddSubscriberDeviceOptsV,
   ClearBadgeOpts,
   SubscribersOpts,
-  CreateSubscriptionOpts
+  CreateSubscriptionOpts,
+  Logger
 } from '../../types'
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from '../../constants'
@@ -44,8 +45,10 @@ export const validateDevice = async (opts: RegisterDeviceOpts) => {
 export class Subscribers {
   public validateDevice = validateDevice
   private db: SubscribersDB
-  constructor({ subscribersDB: subscriberDB }: SubscribersOpts) {
-    this.db = subscriberDB
+  private logger: Logger
+  constructor({ subscribersDB, logger }: SubscribersOpts) {
+    this.db = subscribersDB
+    this.logger = logger
   }
 
   public registerDevice = async ({ device }: RegisterDeviceOpts) => {
@@ -81,11 +84,21 @@ export class Subscribers {
     }
 
     await this.db.updateSubscriber({ ...sub, devices })
+    this.logger.debug({
+      action: 'register-device',
+      subscriber: sub.permalink,
+      protocol
+    })
   }
 
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
     const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
     await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
+    this.logger.debug({
+      action: 'subscribe',
+      subscriber: subscription.subscriber,
+      publisher: subscription.publisher
+    })
   }
 
   public clearBadge = async (opts: ClearBadgeOpts) => {

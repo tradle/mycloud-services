@@ -8,6 +8,7 @@ import { SubscribersDB, Subscriber, Subscription, Device, SignedDevice } from '.
 import subscriberIdentity from '../../../fixtures/identity'
 import * as constants from '../../constants'
 import { serializeDevice, unserializeDevice } from '../../db/push-notifications/subscribers'
+import { createLogger } from '../../utils/logger'
 
 test('un/serialize device', t => {
   const device: Device = {
@@ -53,7 +54,7 @@ test(
     } as SubscribersDB
 
     let subscriber: Subscriber
-    const subscribers = createSubscribers({ subscribersDB })
+    const subscribers = createSubscribers({ subscribersDB, logger: createLogger() })
     await subscribers.registerDevice({ device: device1 })
     t.deepEqual(subscriber, await subscribers.getSubscriber({ permalink: subscriber.permalink }))
     t.equal(subscriber.devices[0].token, device1.token)
@@ -71,6 +72,7 @@ test(
   loudAsync(async t => {
     let subscriber = {} as Subscriber
     const subscribers = createSubscribers({
+      logger: createLogger(),
       subscribersDB: {
         getSubscriber: async opts => {
           return subscriber

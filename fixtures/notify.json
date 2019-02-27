@@ -10,10 +10,10 @@
         "Signature": "EXAMPLE",
         "SigningCertUrl": "EXAMPLE",
         "MessageId": "95df01b4-ee98-5cb9-9903-4c221d41eb5e",
-        "Message": "{\"seq\":0,\"subscriber\":\"694554acd47acfba99961a63938a49a29a19193d8f8574f2685245c16ea769bd\"}",
+        "Message": "{\"seq\":0,\"subscriber\":\"47b147b7380387a7fc529ecfe79a1bacbf08a8aa689aeb35ed4aa3d6e98e0191\"}",
         "Type": "Notification",
         "UnsubscribeUrl": "EXAMPLE",
-        "TopicArn": "arn:aws:sns:us-west-2:123456789012:2222222222-a66596901d030e040b35515220f58b7c3f3c767d49759627e9ef012ba5ecfee2",
+        "TopicArn": "arn:aws:sns:us-east-1:210041114155:210041114155-569a4dc1fc69f6137dede81ca0ff77c1a5feb0f4a7bdc73e0007f5ed3a1d1f60",
         "Subject": "TestInvoke"
       }
     }
