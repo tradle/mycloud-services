@@ -12,6 +12,7 @@
     "offline:debug": "cross-env SLS_DEBUG=* node --inspect ./node_modules/.bin/sls offline start",
     "offline:debug-brk": "cross-env SLS_DEBUG=* node --inspect-brk ./node_modules/.bin/sls offline start",
     "pushconf:local": "IS_LOCAL=1 node ./lib/scripts/aws/gen-and-push-conf.js",
+    "pushconf": "IS_LOCAL= node ./lib/scripts/aws/gen-and-push-conf.js",
     "predeploy": "npm run git:ensureclean && npm run tsbuild && npm test",
     "deploy": "sls deploy $@",
     "deploy:safe": "npm run rebuild:lambda && sls deploy $@",

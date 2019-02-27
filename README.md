@@ -16,14 +16,14 @@ For example:
 
 ```sh
 # .env
-S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs-12345/userlogs
+S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs-12345/userlogs/
 S3_PUSH_CONF_PATH=tdl-tradle-ltd-dev-privateconf-12345/services/pns.json
 MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
 ```
 
 ```sh
 # .env.offline
-S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs/userlogs
+S3_USER_LOGS_PREFIX=tdl-tradle-ltd-dev-logs/userlogs/
 S3_PUSH_CONF_PATH=tdl-tradle-ltd-dev-privateconf/services/pns.json
 MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
 ```

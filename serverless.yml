@@ -42,7 +42,7 @@ provider:
             - ''
             - - 'arn:aws:s3:::'
               - Ref: S3UserLogsPrefix
-              - '/*'
+              - '*'
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
