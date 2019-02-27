@@ -12,19 +12,41 @@ provider:
   runtime: nodejs8.10
   region: ${self:custom.region}
   stage: dev
-  environment:
+  baseEnvironment: &baseEnvironment
     MY_CLOUD_TABLE_NAME:
       Ref: MyCloudTableName
     S3_USER_LOGS_PREFIX:
       Ref: S3UserLogsPrefix
     S3_PATH_TO_PUSH_CONF:
       Ref: S3PushConfPath
-    # NOTIFY_LAMBDA_FUNCTION:
-    #   Ref: NotifyLambdaFunction
     ACCOUNT_ID:
       Ref: AWS::AccountId
     LOG_LEVEL: 'debug'
+  extendedEnvironment: &extendedEnvironment
+    NOTIFY_LAMBDA_FUNCTION:
+      Ref: NotifyLambdaFunction
+  environment:
+    <<: *baseEnvironment
   iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:AddPermission
+        - sns:CreateTopic
+        - sns:DeleteTopic
+        - sns:Publish
+        - sns:Subscribe
+        - sns:Unsubscribe
+        - sns:ListSubscriptions
+        - sns:ListSubscriptionsByTopic
+        - sns:GetTopicAttributes
+        - sns:SetTopicAttributes
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - lambda:AddPermission
+        - lambda:GetPolicy
+      Resource:
+        - Fn::Sub: 'arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:#{AWS::StackName}-*'
     - Effect: Allow
       Action:
         - s3:GetObject
@@ -84,6 +106,8 @@ functions:
 
   registerPublisher:
     handler: lib/entrypoint/http/functions/root.handler
+    environment:
+      <<: *extendedEnvironment
     events:
       - http:
           method: post
@@ -95,11 +119,15 @@ functions:
 
   notify:
     handler: lib/entrypoint/sns/functions/notify.handler
+    environment:
+      <<: *baseEnvironment
 
   # # PUBLIC API (for subscribers)
 
   registerDevice:
     handler: lib/entrypoint/http/functions/root.handler
+    environment:
+      <<: *extendedEnvironment
     events:
       - http:
           method: post
@@ -107,6 +135,8 @@ functions:
 
   subscribe:
     handler: lib/entrypoint/http/functions/root.handler
+    environment:
+      <<: *extendedEnvironment
     events:
       - http:
           method: post
@@ -122,6 +152,8 @@ functions:
   saveUserLog:
     handler: lib/entrypoint/http/functions/root.handler
     memorySize: 128
+    environment:
+      <<: *extendedEnvironment
     events:
       - http:
           method: post
