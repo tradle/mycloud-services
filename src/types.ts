@@ -274,7 +274,8 @@ export type ParsePublisherTopic = (topic: string) => RegisterPublisherOpts
 export const SubscriberV = t.strict({
   permalink: t.string,
   devices: t.array(DeviceV),
-  subscriptions: t.array(t.string)
+  subscriptions: t.array(t.string),
+  _v: t.number
 })
 
 export type Subscriber = t.TypeOf<typeof SubscriberV>

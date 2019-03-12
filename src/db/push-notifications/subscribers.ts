@@ -1,6 +1,7 @@
+import { HexBase64BinaryEncoding } from 'crypto'
 import { DBHandle, Subscriber, SerializedSubscriber, Device } from '../../types'
 import { TYPES } from '../../constants'
-import { HexBase64BinaryEncoding } from 'crypto'
+import updateWithOptimisticLocking from './update-with-optimistic-locking'
 
 export interface SubscribersOpts {
   db: DBHandle
@@ -39,11 +40,22 @@ export class Subscribers {
   // }
 
   private put = async (type: string, resource: any): Promise<void> => {
-    await this.db.put({ _t: type, ...resource })
+    await this.db.put({ _t: type, ...resource }, { overwrite: false })
   }
 
   private update = async (type: string, resource: any): Promise<void> => {
-    await this.db.update({ _t: type, ...resource })
+    if (resource._v === 0) {
+      await this.put(type, resource)
+      return
+    }
+
+    await updateWithOptimisticLocking({
+      db: this.db,
+      resource: {
+        _t: type,
+        ...resource
+      }
+    })
   }
 }
 

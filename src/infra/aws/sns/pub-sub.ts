@@ -7,6 +7,7 @@ interface SNSPubSubOpts {
   sns: SNSClient
   lambda: LambdaClient
   logger: Logger
+  local?: boolean
 }
 
 export class SNSPubSub implements PubSub {
@@ -16,6 +17,8 @@ export class SNSPubSub implements PubSub {
     return this.opts.sns.publish.bind(this.opts.sns)
   }
   public subscribe = async ({ topic, target }) => {
+    if (this.opts.local) return
+
     const tasks = []
     tasks.push(this.opts.sns.subscribeIfNotSubscribed({ topic, target }))
     tasks.push(this.opts.lambda.allowSNSToInvoke(target))
@@ -38,7 +41,7 @@ export class SNSPubSub implements PubSub {
   }
 
   public allowPublish = async ({ topic, publisherId }) => {
-    if (parseArn(topic).accountId !== publisherId) {
+    if (!this.opts.local && parseArn(topic).accountId !== publisherId) {
       await this.opts.sns.allowCrossAccountPublish(topic, [publisherId])
       this.opts.logger.debug({
         action: 'allow-cross-account-publish',

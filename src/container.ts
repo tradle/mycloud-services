@@ -65,7 +65,8 @@ export const createContainer = (config: Config = createConfigFromEnv()): Contain
   const pubSub = createPubSub({
     logger,
     sns: createSNSClient({ clients }),
-    lambda: createLambdaClient({ client: clients.lambda() })
+    lambda: createLambdaClient({ client: clients.lambda() }),
+    local: config.local
   })
 
   const createPublisherTopicName = (opts: RegisterPublisherOpts) =>

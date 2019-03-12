@@ -15,6 +15,7 @@ import {
 import * as crypto from '../../crypto'
 import { PUSH_PROTOCOLS } from '../../constants'
 import * as assert from '../../utils/assert'
+import CustomErrors from '../../errors'
 
 export const validateDevice = async (opts: RegisterDeviceOpts) => {
   if (!(opts && opts.device)) throw new Errors.InvalidOption(`invalid subscriber device`)
@@ -69,12 +70,19 @@ export class Subscribers {
     let sub: Subscriber
     try {
       sub = await this.getSubscriber({ permalink: subscriber })
+      // backwards compat
+      if (typeof sub._v !== 'number') {
+        sub._v = 0
+      }
+
+      sub._v++
     } catch (err) {
       Errors.ignoreNotFound(err)
       sub = {
         permalink: subscriber,
         devices: [],
-        subscriptions: []
+        subscriptions: [],
+        _v: 0
       }
     }
 
@@ -92,8 +100,24 @@ export class Subscribers {
   }
 
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
-    const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
-    await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
+    let attempts = 10
+    let err: Error
+    do {
+      if (err) {
+        this.logger.debug({
+          action: 'subscribe-retry',
+          error: err.message
+        })
+      }
+
+      const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
+      try {
+        await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
+      } catch (e) {
+        err = e
+      }
+    } while (err && err instanceof CustomErrors.Conflict && attempts--)
+
     this.logger.debug({
       action: 'subscribe',
       subscriber: subscription.subscriber,

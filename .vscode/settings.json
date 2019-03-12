@@ -1,3 +1,11 @@
 {
-  "debug.node.autoAttach": "on"
+  "editor.formatOnSave": true,
+  "debug.node.autoAttach": "on",
+	"prettier.tslintIntegration": true,
+	"prettier.singleQuote": true,
+	"prettier.eslintIntegration": true,
+	"prettier.semi": false,
+	"prettier.printWidth": 120,
+	"prettier.trailingComma": "none",
+	"prettier.useTabs": false,
 }

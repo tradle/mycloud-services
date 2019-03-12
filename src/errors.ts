@@ -16,10 +16,15 @@ class Unsupported extends Error {
   public type = 'Unsupported'
 }
 
+class Conflict extends Error {
+  public type = 'Conflict'
+}
+
 export = {
   ...Errors,
   InvalidSignature,
   NotImplemented,
   Unsupported,
-  Forbidden
+  Forbidden,
+  Conflict
 }

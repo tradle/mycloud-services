@@ -24,18 +24,19 @@
     "prepare:addfriend:local:brk": "node --inspect-brk ./src/scripts/add-friend-local.js",
     "invoke:local:registerPublisher": "cat fixtures/register-publisher.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerPublisher",
     "invoke:local:registerPublisher:brk": "cat fixtures/register-publisher.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f registerPublisher",
-    "invoke:local:registerDevice": "cat fixtures/register-device.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerDevice",
-    "invoke:local:registerDevice:brk": "cat fixtures/register-device.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f registerDevice",
+    "invoke:local:registerDevice": "cat fixtures/register-device-apn.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f registerDevice",
+    "invoke:local:registerDevice:brk": "cat fixtures/register-device-apn.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f registerDevice",
     "invoke:local:subscribe": "cat fixtures/subscribe.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f subscribe",
+    "invoke:local:subscribe:brk": "cat fixtures/subscribe.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f subscribe",
     "invoke:local:notify": "cat fixtures/notify.json | IS_LOCAL=1 node ./node_modules/.bin/sls invoke local -f notify",
     "invoke:local:notify:brk": "cat fixtures/notify.json | IS_LOCAL=1 node --inspect-brk ./node_modules/.bin/sls invoke local -f notify"
   },
   "dependencies": {
-    "@tradle/aws-client-factory": "~1.0.1-alpha.11",
-    "@tradle/aws-common-utils": "~1.0.1-alpha.11",
-    "@tradle/aws-lambda-client": "~1.0.1-alpha.11",
-    "@tradle/aws-s3-client": "~1.0.1-alpha.11",
-    "@tradle/aws-sns-client": "~1.0.1-alpha.11",
+    "@tradle/aws-client-factory": "~1.0.1-alpha.14",
+    "@tradle/aws-common-utils": "~1.0.1-alpha.15",
+    "@tradle/aws-lambda-client": "~1.0.1-alpha.15",
+    "@tradle/aws-s3-client": "~1.0.1-alpha.15",
+    "@tradle/aws-sns-client": "~1.0.1-alpha.15",
     "@tradle/build-resource": "~4.0.2",
     "@tradle/dynamodb": "github:tradle/dynamodb",
     "@tradle/engine": "~8.1.0",
@@ -98,7 +99,7 @@
     "tslib": "~1.9.3",
     "tslint": "~5.12.1",
     "tslint-config-prettier": "~1.17.0",
-    "typescript": "~3.2.4"
+    "typescript": "~3.3.3333"
   },
   "author": "mvayngrib",
   "license": "MIT"
