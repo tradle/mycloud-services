@@ -48,8 +48,8 @@ test(
 
         throw new Errors.NotFound(`subscriber ${opts.permalink}`)
       },
-      updateSubscriber: async sub => {
-        subscriber = sub
+      updateSubscriber: async (permalink, map) => {
+        subscriber = map({ permalink, _t: constants.TYPES.SUBSCRIBER })
       }
     } as SubscribersDB
 
@@ -77,8 +77,8 @@ test(
         getSubscriber: async opts => {
           return subscriber
         },
-        updateSubscriber: async update => {
-          subscriber = update
+        updateSubscriber: async (current, map) => {
+          subscriber = map(current)
         }
       } as SubscribersDB
     })

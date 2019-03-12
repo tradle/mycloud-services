@@ -1,6 +1,7 @@
 import Status from 'http-status'
+import * as Errors from '@tradle/errors'
 import { RouterMiddleware as Middleware } from '../../../types'
-import Errors from '../../../errors'
+import CustomErrors from '../../../errors'
 
 export const create = (): Middleware => async (ctx, next) => {
   try {
@@ -8,7 +9,7 @@ export const create = (): Middleware => async (ctx, next) => {
   } catch (err) {
     const { logger } = ctx.container
     logger.error(err)
-    if (err instanceof Errors.UserError || err instanceof Errors.InvalidOption) {
+    if (Errors.matches(err, [CustomErrors.UserError, CustomErrors.InvalidOption])) {
       ctx.status = Status.BAD_REQUEST
       ctx.body = { message: err.message }
       return

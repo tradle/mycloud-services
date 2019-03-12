@@ -1,5 +1,7 @@
 require('../../../../source-map-install')
 
+Error.stackTraceLimit = Infinity
+
 import serverlessHttp from 'serverless-http'
 import { createRouter } from '../router'
 import { createContainer } from '../../../container'

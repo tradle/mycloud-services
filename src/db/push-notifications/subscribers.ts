@@ -1,7 +1,7 @@
 import { HexBase64BinaryEncoding } from 'crypto'
-import { DBHandle, Subscriber, SerializedSubscriber, Device } from '../../types'
+import { DBHandle, Subscriber, SerializedSubscriber, Device, ResourceMapper } from '../../types'
 import { TYPES } from '../../constants'
-import updateWithOptimisticLocking from './update-with-optimistic-locking'
+import { updateWithRetry, setProps } from './update-with-optimistic-locking'
 
 export interface SubscribersOpts {
   db: DBHandle
@@ -29,7 +29,15 @@ export class Subscribers {
   // public getSubscription = async ({ publisher, subscriber }: GetSubcriptionOpts) =>
   //   this.db.matchOne(TYPES.SUBSCRIPTION, { publisher, subscriber })
 
-  public updateSubscriber = async (sub: Subscriber) => this.update(TYPES.SUBSCRIBER, sub)
+  public updateSubscriber = async (permalink: string, map: ResourceMapper) => {
+    await setProps({
+      db: this.db,
+      keys: { _t: TYPES.SUBSCRIBER, permalink },
+      versionProp: '_v',
+      map,
+      maxAttempts: 10
+    })
+  }
 
   // use put() because subscription is signed
   // public updateSubscription = (sub: Subscription) => this.put(TYPES.SUBSCRIPTION, sub)
@@ -41,21 +49,6 @@ export class Subscribers {
 
   private put = async (type: string, resource: any): Promise<void> => {
     await this.db.put({ _t: type, ...resource }, { overwrite: false })
-  }
-
-  private update = async (type: string, resource: any): Promise<void> => {
-    if (resource._v === 0) {
-      await this.put(type, resource)
-      return
-    }
-
-    await updateWithOptimisticLocking({
-      db: this.db,
-      resource: {
-        _t: type,
-        ...resource
-      }
-    })
   }
 }
 

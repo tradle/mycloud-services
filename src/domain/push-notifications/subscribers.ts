@@ -13,7 +13,7 @@ import {
   Logger
 } from '../../types'
 import * as crypto from '../../crypto'
-import { PUSH_PROTOCOLS } from '../../constants'
+import { PUSH_PROTOCOLS, TYPES } from '../../constants'
 import * as assert from '../../utils/assert'
 import CustomErrors from '../../errors'
 
@@ -66,58 +66,18 @@ export class Subscribers {
   public addSubscriberDevice = async (opts: AddSubscriberDeviceOpts) => {
     assert.isTypeOf(opts, AddSubscriberDeviceOptsV)
 
-    const { subscriber, token, protocol } = opts
-    let sub: Subscriber
-    try {
-      sub = await this.getSubscriber({ permalink: subscriber })
-      // backwards compat
-      if (typeof sub._v !== 'number') {
-        sub._v = 0
-      }
+    const { subscriber, protocol } = opts
+    await this.db.updateSubscriber(subscriber, withDevice(opts))
 
-      sub._v++
-    } catch (err) {
-      Errors.ignoreNotFound(err)
-      sub = {
-        permalink: subscriber,
-        devices: [],
-        subscriptions: [],
-        _v: 0
-      }
-    }
-
-    const { devices = [] } = sub
-    if (!devices.find(d => d.token === token)) {
-      devices.push({ protocol, token })
-    }
-
-    await this.db.updateSubscriber({ ...sub, devices })
     this.logger.debug({
       action: 'register-device',
-      subscriber: sub.permalink,
+      subscriber,
       protocol
     })
   }
 
   public createSubscription = async ({ subscription }: CreateSubscriptionOpts) => {
-    let attempts = 10
-    let err: Error
-    do {
-      if (err) {
-        this.logger.debug({
-          action: 'subscribe-retry',
-          error: err.message
-        })
-      }
-
-      const subscriber = await this.db.getSubscriber({ permalink: subscription.subscriber })
-      try {
-        await this.db.updateSubscriber(withSubscription({ subscriber, subscription }))
-      } catch (e) {
-        err = e
-      }
-    } while (err && err instanceof CustomErrors.Conflict && attempts--)
-
+    await this.db.updateSubscriber(subscription.subscriber, withSubscription(subscription))
     this.logger.debug({
       action: 'subscribe',
       subscriber: subscription.subscriber,
@@ -147,13 +107,35 @@ export class Subscribers {
 
 export const create = (ctx: SubscribersOpts) => new Subscribers(ctx)
 
-interface WithSubscriptionOpts {
-  subscriber: Subscriber
-  subscription: Subscription
+export const withSubscription = ({ publisher }: Subscription) => (subscriber: Subscriber) => {
+  const { subscriptions = [] } = subscriber
+  if (subscriptions.includes(publisher)) {
+    throw new CustomErrors.UpdateAborted('already subscribed')
+  }
+
+  return normalizeSubscriberUpdate({
+    ...subscriber,
+    subscriptions: subscriptions.filter(existing => existing !== publisher).concat(publisher)
+  })
 }
-export const withSubscription = ({ subscriber, subscription }: WithSubscriptionOpts): Subscriber => ({
+
+export const withDevice = ({ subscriber, protocol, token }: AddSubscriberDeviceOpts) => (sub: Subscriber) => {
+  const { devices = [] } = sub
+  if (devices.some(d => d.token === token)) {
+    throw new CustomErrors.UpdateAborted('already have token')
+  }
+
+  return normalizeSubscriberUpdate({
+    ...sub,
+    permalink: subscriber,
+    devices: [...devices.filter(d => d.token !== token), { protocol, token }]
+  })
+}
+
+const normalizeSubscriberUpdate = (subscriber: Subscriber) => ({
   ...subscriber,
-  subscriptions: (subscriber.subscriptions || [])
-    .filter(s => s !== subscription.publisher)
-    .concat(subscription.publisher)
+  _t: TYPES.SUBSCRIBER,
+  _v: typeof subscriber._v === 'number' ? subscriber._v + 1 : 0,
+  devices: subscriber.devices || [],
+  subscriptions: subscriber.subscriptions || []
 })

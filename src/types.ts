@@ -386,3 +386,5 @@ export interface Container {
   // pushConf: PushConfStore
   ready: Promise<void>
 }
+
+export type ResourceMapper = (resource: any) => any

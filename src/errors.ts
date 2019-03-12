@@ -18,7 +18,12 @@ class Unsupported extends Error {
 
 class Conflict extends Error {
   public type = 'Conflict'
+  constructor(private conflict: any) {
+    super('write aborted due to conflict')
+  }
 }
+
+class UpdateAborted extends Error {}
 
 export = {
   ...Errors,
@@ -26,5 +31,6 @@ export = {
   NotImplemented,
   Unsupported,
   Forbidden,
-  Conflict
+  Conflict,
+  UpdateAborted
 }
