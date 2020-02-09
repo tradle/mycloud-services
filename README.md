@@ -31,6 +31,39 @@ MY_CLOUD_TABLE_NAME=tdl-tradle-ltd-dev-bucket-0
 `.env` should reference resources in AWS
 `.env.offline` should reference resources in [localstack](https://github.com/localstack/localstack). If you have a MyCloud development environment set up, you should have the relevant S3 buckets and DynamoDB table there
 
+### Gen APNS Certs
+
+copied from: https://gist.github.com/telekosmos/b70df24dee342cd05503fba36f230317 
+
+After requesting the certificate from Apple (to do this, go to __Apple Developer site__ -> __APNs Auth key__ -> __[+]__), 
+download the `.cer` file (usually named `aps_production.cer` or `aps_development.cer`) from the iOS Provisioning Portal, save in a clean directory, and import it into Keychain Access.
+
+It should now appear in the keyring under the "Certificates" category, as `
+Apple Push Services`. Inside the certificate you should see a private key (only when filtering for the "Certificates" category). 
+
+Export this private key as a `.p12` file:
+- Right click in the certificate we are interested in _Keychain_ and select _Export..._
+- Accept the default `.p12` file format and then click Save
+
+or
+
+- Keychain Access, select Keys, and then highlight your app private key.
+- Click File, click Export Items..., and then enter a name in the Save As: field.
+
+
+Now, in the directory containing `cert.cer` and `key.p12` (preferably at server), execute the following commands to generate your `.pem` files:
+
+	$ openssl x509 -in cert.cer -inform DER -outform PEM -out cert.pem
+	$ openssl pkcs12 -in key.p12 -out key.pem -nodes
+	
+Test certificates:
+
+	$ openssl s_client -connect gateway.push.apple.com:2195 -cert cert.pem -key key.pem # production
+
+If you are using a development certificate you may wish to name them differently to enable fast switching between development and production. The filenames are configurable within the module options, so feel free to name them something more appropriate.
+
+It is also possible to supply a PFX (PFX/PKCS12) package containing your certificate, key and any relevant CA certificates. The method to accomplish this is left as an exercise to the reader. It should be possible to select the relevant items in "Keychain Access" and use the export option with `.p12` format.
+
 ### Local
 
 Save your configuration to S3:
